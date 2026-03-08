@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DumpIt — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid: #2d5a3d;
+      --green-bright: #4a8c5c;
+      --green-light: #7ab88a;
+      --green-pale: #b8d4be;
+      --cream: #f5f0e8;
+      --cream-dark: #e8e0d0;
+      --gold: #c9a84c;
+      --error: #c0392b;
+      --success: #27ae60;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--green-deep);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      cursor: none;
+      overflow: hidden;
+    }
+
+    /* Cursor */
+    .cursor { position: fixed; width: 10px; height: 10px; background: var(--green-bright); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: transform 0.15s; }
+    .cursor-ring { position: fixed; width: 32px; height: 32px; border: 1.5px solid var(--green-bright); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); opacity: 0.4; transition: all 0.25s; }
+
+    /* Grain */
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      background: var(--green-deep);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3rem;
+    }
+
+    /* Animated blobs */
+    .blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+    .blob-1 { width: 400px; height: 400px; background: rgba(74,140,92,0.18); top: -80px; left: -80px; animation: blobFloat 8s ease-in-out infinite; }
+    .blob-2 { width: 300px; height: 300px; background: rgba(201,168,76,0.1); bottom: -60px; right: -60px; animation: blobFloat 10s ease-in-out infinite reverse; }
+    .blob-3 { width: 200px; height: 200px; background: rgba(122,184,138,0.12); top: 40%; left: 30%; animation: blobFloat 7s ease-in-out infinite 2s; }
+    @keyframes blobFloat { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(20px,-20px) scale(1.05);} 66%{transform:translate(-15px,15px) scale(0.97);} }
+
+    .left-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--cream);
+      letter-spacing: -0.02em;
+      position: relative; z-index: 2;
+      text-decoration: none;
+    }
+    .left-logo span { color: var(--green-light); }
+
+    .left-center {
+      position: relative; z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .left-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--green-pale);
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      width: fit-content;
+    }
+    .left-tag::before { content: ''; width: 6px; height: 6px; background: var(--green-light); border-radius: 50%; }
+
+    .left-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3.2rem);
+      font-weight: 900;
+      color: var(--cream);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.2rem;
+    }
+    .left-title em { font-style: italic; color: var(--green-light); }
+
+    .left-desc {
+      font-size: 0.95rem;
+      color: var(--green-pale);
+      font-weight: 300;
+      line-height: 1.65;
+      max-width: 360px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Feature pills */
+    .feature-pills { display: flex; flex-direction: column; gap: 0.8rem; }
+    .pill {
+      display: flex; align-items: center; gap: 0.9rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 14px;
+      padding: 0.9rem 1.1rem;
+      animation: pillIn 0.6s ease both;
+    }
+    .pill:nth-child(1) { animation-delay: 0.1s; }
+    .pill:nth-child(2) { animation-delay: 0.2s; }
+    .pill:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes pillIn { from{opacity:0;transform:translateX(-16px);} to{opacity:1;transform:translateX(0);} }
+    .pill-icon { font-size: 1.2rem; }
+    .pill-text { font-size: 0.82rem; color: var(--cream); font-weight: 400; line-height: 1.3; }
+    .pill-text strong { color: var(--green-light); }
+
+    /* Left stats */
+    .left-stats {
+      display: flex; gap: 2rem;
+      position: relative; z-index: 2;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .lst-val { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--cream); }
+    .lst-label { font-size: 0.7rem; color: var(--green-pale); margin-top: 0.2rem; }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 4rem;
+      overflow-y: auto;
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* Toggle */
+    .auth-toggle {
+      display: flex;
+      background: var(--cream-dark);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .toggle-slider {
+      position: absolute;
+      top: 4px; left: 4px;
+      width: calc(50% - 4px);
+      height: calc(100% - 8px);
+      background: var(--green-deep);
+      border-radius: 10px;
+      transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .auth-toggle.signup .toggle-slider { left: calc(50%); }
+    .toggle-btn {
+      flex: 1; z-index: 2; position: relative;
+      padding: 0.65rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; font-weight: 600;
+      background: transparent; border: none;
+      cursor: none; border-radius: 10px;
+      transition: color 0.3s;
+      color: var(--green-mid);
+    }
+    .toggle-btn.active { color: var(--cream); }
+
+    .auth-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.02em;
+    }
+    .auth-sub {
+      font-size: 0.88rem; color: var(--green-mid);
+      font-weight: 300; margin-bottom: 1.8rem;
+      line-height: 1.5;
+    }
+
+    /* METHOD TABS */
+    .method-tabs {
+      display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+    }
+    .method-tab {
+      flex: 1; padding: 0.55rem;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 10px; background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; font-weight: 500;
+      color: var(--green-mid); cursor: none;
+      transition: all 0.2s; text-align: center;
+    }
+    .method-tab:hover { border-color: var(--green-pale); }
+    .method-tab.active { border-color: var(--green-bright); background: rgba(74,140,92,0.06); color: var(--green-deep); font-weight: 600; }
+
+    /* FORM PANELS */
+    .form-panel { display: none; animation: fadeUp 0.35s ease; }
+    .form-panel.active { display: block; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+    /* INPUTS */
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--green-mid); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .input-wrap { position: relative; }
+    .input-icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); font-size: 0.95rem; pointer-events: none; }
+    .form-input {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.5rem;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 12px;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      color: var(--green-deep);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(74,140,92,0.1); }
+    .form-input.error { border-color: var(--error); }
+    .form-input.success { border-color: var(--success); }
+    .eye-btn { position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: none; font-size: 0.9rem; color: var(--green-mid); }
+    .err-msg { font-size: 0.72rem; color: var(--error); margin-top: 0.3rem; display: none; }
+    .err-msg.show { display: block; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+    /* OTP */
+    .otp-row { display: flex; gap: 0.7rem; margin-bottom: 1.1rem; }
+    .otp-input {
+      flex: 1; height: 52px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 12px;
+      background: white;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 700;
+      text-align: center;
+      color: var(--green-deep);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .otp-input:focus { border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(74,140,92,0.1); }
+    .otp-input.filled { border-color: var(--green-bright); background: rgba(74,140,92,0.04); }
+    .phone-row { display: flex; gap: 0.6rem; }
+    .country-code {
+      width: 80px; flex-shrink: 0;
+      padding: 0.85rem 0.7rem;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 12px;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--green-deep);
+      outline: none;
+      text-align: center;
+      font-weight: 600;
+    }
+    .send-otp-btn {
+      width: 100%; padding: 0.85rem;
+      background: var(--green-mid); color: white;
+      border: none; border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; font-weight: 600;
+      cursor: none; transition: all 0.2s;
+      margin-bottom: 1.1rem;
+    }
+    .send-otp-btn:hover { background: var(--green-bright); }
+    .send-otp-btn:disabled { background: var(--cream-dark); color: var(--green-mid); cursor: default; }
+    .resend-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--green-mid); margin-bottom: 1rem; }
+    .resend-link { color: var(--green-bright); cursor: none; font-weight: 500; text-decoration: underline; }
+
+    /* Password strength */
+    .strength-bar { height: 4px; background: var(--cream-dark); border-radius: 100px; margin-top: 0.5rem; overflow: hidden; }
+    .strength-fill { height: 100%; border-radius: 100px; transition: width 0.3s, background 0.3s; width: 0; }
+    .strength-label { font-size: 0.7rem; margin-top: 0.3rem; transition: color 0.3s; }
+
+    /* SUBMIT BUTTON */
+    .submit-btn {
+      width: 100%; padding: 1rem;
+      background: var(--green-deep); color: var(--cream);
+      border: none; border-radius: 100px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 700;
+      cursor: none; transition: all 0.3s;
+      margin-top: 0.5rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      letter-spacing: 0.02em;
+    }
+    .submit-btn:hover { background: var(--green-bright); box-shadow: 0 10px 30px rgba(74,140,92,0.25); transform: translateY(-1px); }
+    .submit-btn.loading { background: var(--green-mid); pointer-events: none; }
+
+    /* DIVIDER */
+    .divider { display: flex; align-items: center; gap: 0.8rem; margin: 1.2rem 0; }
+    .divider-line { flex: 1; height: 1px; background: var(--cream-dark); }
+    .divider-text { font-size: 0.75rem; color: var(--green-mid); font-weight: 500; }
+
+    /* GOOGLE BUTTON */
+    .google-btn {
+      width: 100%; padding: 0.85rem;
+      background: white; color: var(--green-deep);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 100px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: none; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.7rem;
+    }
+    .google-btn:hover { border-color: var(--green-bright); box-shadow: 0 4px 16px rgba(26,58,42,0.08); }
+    .google-icon { width: 18px; height: 18px; }
+
+    /* TERMS */
+    .terms-text { font-size: 0.72rem; color: var(--green-mid); text-align: center; margin-top: 1.2rem; line-height: 1.5; }
+    .terms-text a { color: var(--green-bright); text-decoration: none; font-weight: 500; }
+    .terms-text a:hover { text-decoration: underline; }
+
+    /* Checkbox */
+    .check-group { display: flex; align-items: flex-start; gap: 0.7rem; margin-bottom: 1rem; }
+    .check-group input[type=checkbox] { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--green-bright); cursor: none; flex-shrink: 0; }
+    .check-group label { font-size: 0.78rem; color: var(--green-mid); line-height: 1.4; }
+    .check-group label a { color: var(--green-bright); text-decoration: none; }
+
+    /* SUCCESS STATE */
+    .success-state { display: none; text-align: center; padding: 2rem 0; animation: fadeUp 0.5s ease; }
+    .success-state.show { display: block; }
+    .success-emoji { font-size: 4rem; margin-bottom: 1rem; display: block; animation: pop 0.5s ease; }
+    @keyframes pop { 0%{transform:scale(0);} 70%{transform:scale(1.15);} 100%{transform:scale(1);} }
+    .success-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--green-deep); margin-bottom: 0.5rem; }
+    .success-sub { font-size: 0.88rem; color: var(--green-mid); line-height: 1.5; margin-bottom: 1.5rem; }
+
+    @media (max-width: 900px) {
+      body { grid-template-columns: 1fr; overflow: auto; }
+      .left-panel { display: none; }
+      .right-panel { padding: 2rem 1.5rem; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <a href="index.html" class="left-logo">Dump<span>It</span></a>
+
+  <div class="left-center">
+    <div class="left-tag">🌱 Join the movement</div>
+    <h1 class="left-title">
+      Clean streets<br>start with <em>you.</em>
+    </h1>
+    <p class="left-desc">
+      Sign up in under 2 minutes. Book your first pickup, earn carbon tokens, and help build a greener neighbourhood.
+    </p>
+    <div class="feature-pills">
+      <div class="pill">
+        <div class="pill-icon">🚛</div>
+        <div class="pill-text"><strong>Reliable daily pickups</strong> — even when the govt truck doesn't come</div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">🪙</div>
+        <div class="pill-text"><strong>Earn carbon tokens</strong> — every pickup adds to your balance</div>
+      </div>
+      <div class="pill">
+        <div class="pill-icon">🌍</div>
+        <div class="pill-text"><strong>Track your impact</strong> — see CO₂ saved, streaks & neighbourhood rank</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="left-stats">
+    <div><div class="lst-val">12K+</div><div class="lst-label">Happy households</div></div>
+    <div><div class="lst-val">98%</div><div class="lst-label">On-time pickups</div></div>
+    <div><div class="lst-val">340T</div><div class="lst-label">Waste diverted</div></div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="auth-box">
+
+    <!-- Toggle -->
+    <div class="auth-toggle" id="authToggle">
+      <div class="toggle-slider"></div>
+      <button class="toggle-btn active" id="loginToggleBtn" onclick="switchMode('login')">Sign In</button>
+      <button class="toggle-btn" id="signupToggleBtn" onclick="switchMode('signup')">Create Account</button>
+    </div>
+
+    <!-- Heading -->
+    <div class="auth-heading" id="authHeading">Welcome back 👋</div>
+    <div class="auth-sub" id="authSub">Sign in to manage your pickups and track your carbon tokens.</div>
+
+    <!-- Success state -->
+    <div class="success-state" id="successState">
+      <span class="success-emoji">🌿</span>
+      <div class="success-title" id="successTitle">You're in!</div>
+      <div class="success-sub" id="successSub">Redirecting you to your dashboard…</div>
+      <a href="dashboard.html" class="submit-btn" style="text-decoration:none;display:flex;">Go to Dashboard →</a>
+    </div>
+
+    <!-- Auth forms wrapper -->
+    <div id="authForms">
+
+      <!-- METHOD TABS -->
+      <div class="method-tabs">
+        <button class="method-tab active" id="tabEmail" onclick="switchMethod('email')">📧 Email</button>
+        <button class="method-tab" id="tabPhone" onclick="switchMethod('phone')">📱 Phone / OTP</button>
+      </div>
+
+      <!-- ═══ EMAIL PANEL ═══ -->
+      <div class="form-panel active" id="emailPanel">
+
+        <!-- LOGIN fields -->
+        <div id="loginEmailFields">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-wrap">
+              <span class="input-icon">✉️</span>
+              <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com"/>
+            </div>
+            <div class="err-msg" id="errLoginEmail">Please enter a valid email</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" class="form-input" id="loginPass" placeholder="Your password"/>
+              <button class="eye-btn" onclick="togglePass('loginPass', this)">👁</button>
+            </div>
+            <div class="err-msg" id="errLoginPass">Please enter your password</div>
+          </div>
+          <div style="text-align:right;margin-bottom:1rem;">
+            <a href="#" style="font-size:0.78rem;color:var(--green-bright);text-decoration:none;font-weight:500;">Forgot password?</a>
+          </div>
+          <button class="submit-btn" onclick="handleLogin()">Sign In →</button>
+        </div>
+
+        <!-- SIGNUP fields -->
+        <div id="signupEmailFields" style="display:none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <div class="input-wrap">
+                <span class="input-icon">👤</span>
+                <input type="text" class="form-input" id="signupFirst" placeholder="Rahul"/>
+              </div>
+              <div class="err-msg" id="errFirst">Required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <div class="input-wrap">
+                <span class="input-icon">👤</span>
+                <input type="text" class="form-input" id="signupLast" placeholder="Sharma"/>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-wrap">
+              <span class="input-icon">✉️</span>
+              <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com"/>
+            </div>
+            <div class="err-msg" id="errSignupEmail">Please enter a valid email</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <div class="phone-row">
+              <input type="text" class="country-code" value="+91" readonly/>
+              <div class="input-wrap" style="flex:1;">
+                <span class="input-icon">📱</span>
+                <input type="tel" class="form-input" id="signupPhone" placeholder="98765 43210"/>
+              </div>
+            </div>
+            <div class="err-msg" id="errSignupPhone">Enter a valid 10-digit number</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Home Address</label>
+            <div class="input-wrap">
+              <span class="input-icon">📍</span>
+              <input type="text" class="form-input" id="signupAddr" placeholder="Flat 4B, MG Road, Bengaluru — 560001"/>
+            </div>
+            <div class="err-msg" id="errAddr">Please enter your address</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" class="form-input" id="signupPass" placeholder="Min. 8 characters" oninput="checkStrength(this.value)"/>
+              <button class="eye-btn" onclick="togglePass('signupPass', this)">👁</button>
+            </div>
+            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <div class="strength-label" id="strengthLabel" style="color:var(--green-mid);">Enter a password</div>
+            <div class="err-msg" id="errSignupPass">Password must be at least 8 characters</div>
+          </div>
+          <div class="check-group">
+            <input type="checkbox" id="termsCheck"/>
+            <label for="termsCheck">I agree to DumpIt's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+          </div>
+          <button class="submit-btn" onclick="handleSignup()">Create Account →</button>
+        </div>
+      </div>
+
+      <!-- ═══ PHONE / OTP PANEL ═══ -->
+      <div class="form-panel" id="phonePanel">
+
+        <!-- Step 1: Enter phone -->
+        <div id="phoneStep1">
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <div class="phone-row">
+              <input type="text" class="country-code" value="+91" readonly/>
+              <div class="input-wrap" style="flex:1;">
+                <span class="input-icon">📱</span>
+                <input type="tel" class="form-input" id="otpPhone" placeholder="98765 43210" oninput="onPhoneInput()"/>
+              </div>
+            </div>
+            <div class="err-msg" id="errOtpPhone">Enter a valid 10-digit number</div>
+          </div>
+          <button class="send-otp-btn" id="sendOtpBtn" onclick="sendOTP()" disabled>Send OTP</button>
+        </div>
+
+        <!-- Step 2: Enter OTP -->
+        <div id="phoneStep2" style="display:none;">
+          <div style="font-size:0.85rem;color:var(--green-mid);margin-bottom:1rem;line-height:1.5;">
+            OTP sent to <strong id="sentToNum" style="color:var(--green-deep);"></strong>. Enter the 6-digit code below.
+          </div>
+          <div class="otp-row" id="otpRow">
+            <input class="otp-input" maxlength="1" type="text" inputmode="numeric" oninput="otpNav(this,0)"/>
+            <input class="otp-input" maxlength="1" type="text" inputmode="numeric" oninput="otpNav(this,1)"/>
+            <input class="otp-input" maxlength="1" type="text" inputmode="numeric" oninput="otpNav(this,2)"/>
+            <input class="otp-input" maxlength="1" type="text" inputmode="numeric" oninput="otpNav(this,3)"/>
+            <input class="otp-input" maxlength="1" type="text" inputmode="numeric" oninput="otpNav(this,4)"/>
+            <input class="otp-input" maxlength="1" type="text" inputmode="numeric" oninput="otpNav(this,5)"/>
+          </div>
+          <div class="resend-row">
+            <span id="timerText">Resend in <strong id="countdown">30</strong>s</span>
+            <span class="resend-link" id="resendLink" style="display:none;" onclick="resendOTP()">Resend OTP</span>
+          </div>
+          <button class="submit-btn" onclick="verifyOTP()">Verify & Continue →</button>
+          <div style="text-align:center;margin-top:1rem;">
+            <span style="font-size:0.78rem;color:var(--green-bright);cursor:pointer;text-decoration:underline;" onclick="backToPhone()">← Change number</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIVIDER -->
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-text">or continue with</div>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- GOOGLE -->
+      <button class="google-btn" onclick="googleAuth()">
+        <svg class="google-icon" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="terms-text" id="termsBottom">
+        By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+      </div>
+
+    </div><!-- /authForms -->
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+  (function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+  document.querySelectorAll('button,a,input,.toggle-btn,.method-tab').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(1.6)';ring.style.opacity='0.25';});
+    el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='0.4';});
+  });
+
+  // STATE
+  let mode = 'login'; // login | signup
+  let method = 'email'; // email | phone
+  let otpTimer = null;
+
+  // SWITCH MODE
+  function switchMode(m) {
+    mode = m;
+    const toggle = document.getElementById('authToggle');
+    toggle.classList.toggle('signup', m === 'signup');
+    document.getElementById('loginToggleBtn').classList.toggle('active', m === 'login');
+    document.getElementById('signupToggleBtn').classList.toggle('active', m === 'signup');
+    document.getElementById('authHeading').textContent = m === 'login' ? 'Welcome back 👋' : 'Join DumpIt 🌱';
+    document.getElementById('authSub').textContent = m === 'login'
+      ? 'Sign in to manage your pickups and track your carbon tokens.'
+      : 'Create your account and start your clean-street journey today.';
+    document.getElementById('loginEmailFields').style.display = m === 'login' ? 'block' : 'none';
+    document.getElementById('signupEmailFields').style.display = m === 'signup' ? 'block' : 'none';
+  }
+
+  // SWITCH METHOD
+  function switchMethod(m) {
+    method = m;
+    document.getElementById('tabEmail').classList.toggle('active', m === 'email');
+    document.getElementById('tabPhone').classList.toggle('active', m === 'phone');
+    document.getElementById('emailPanel').classList.toggle('active', m === 'email');
+    document.getElementById('phonePanel').classList.toggle('active', m === 'phone');
+  }
+
+  // TOGGLE PASSWORD VISIBILITY
+  function togglePass(id, btn) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+  }
+
+  // PASSWORD STRENGTH
+  function checkStrength(val) {
+    const fill = document.getElementById('strengthFill');
+    const label = document.getElementById('strengthLabel');
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const configs = [
+      { w:'0%', c:'var(--green-pale)', t:'Enter a password' },
+      { w:'25%', c:'var(--error)', t:'Weak' },
+      { w:'50%', c:'var(--gold)', t:'Fair' },
+      { w:'75%', c:'var(--green-bright)', t:'Good' },
+      { w:'100%', c:'var(--success)', t:'Strong 💪' },
+    ];
+    const cfg = configs[val.length === 0 ? 0 : score];
+    fill.style.width = cfg.w;
+    fill.style.background = cfg.c;
+    label.style.color = cfg.c;
+    label.textContent = val.length === 0 ? 'Enter a password' : cfg.t;
+  }
+
+  // SHOW/HIDE ERROR
+  function showErr(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('show', show);
+    return show;
+  }
+  function markInput(id, err) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('error', err);
+    el.classList.toggle('success', !err && el.value.length > 0);
+  }
+
+  // LOGIN
+  function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPass').value;
+    let valid = true;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (showErr('errLoginEmail', !emailOk)) valid = false;
+    markInput('loginEmail', !emailOk);
+    if (showErr('errLoginPass', pass.length < 1)) valid = false;
+    markInput('loginPass', pass.length < 1);
+    if (!valid) return;
+    simulateSubmit(() => showSuccess('Welcome back! 🌿', 'Signing you in to your dashboard…'));
+  }
+
+  // SIGNUP
+  function handleSignup() {
+    const first = document.getElementById('signupFirst').value;
+    const email = document.getElementById('signupEmail').value;
+    const phone = document.getElementById('signupPhone').value.replace(/\s/g,'');
+    const addr = document.getElementById('signupAddr').value;
+    const pass = document.getElementById('signupPass').value;
+    const terms = document.getElementById('termsCheck').checked;
+    let valid = true;
+    if (showErr('errFirst', first.trim().length < 2)) valid = false; markInput('signupFirst', first.trim().length < 2);
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (showErr('errSignupEmail', !emailOk)) valid = false; markInput('signupEmail', !emailOk);
+    const phoneOk = /^\d{10}$/.test(phone);
+    if (showErr('errSignupPhone', !phoneOk)) valid = false; markInput('signupPhone', !phoneOk);
+    if (showErr('errAddr', addr.trim().length < 5)) valid = false; markInput('signupAddr', addr.trim().length < 5);
+    if (showErr('errSignupPass', pass.length < 8)) valid = false; markInput('signupPass', pass.length < 8);
+    if (!terms) { alert('Please accept the Terms of Service to continue.'); valid = false; }
+    if (!valid) return;
+    simulateSubmit(() => showSuccess('Account created! 🎉', `Welcome to DumpIt, ${first}! Redirecting to your dashboard…`));
+  }
+
+  // SIMULATE ASYNC
+  function simulateSubmit(cb) {
+    const btn = event.currentTarget;
+    const orig = btn.innerHTML;
+    btn.classList.add('loading');
+    btn.innerHTML = '⏳ Verifying…';
+    setTimeout(() => { btn.classList.remove('loading'); btn.innerHTML = orig; cb(); }, 1500);
+  }
+
+  // SUCCESS
+  function showSuccess(title, sub) {
+    document.getElementById('authForms').style.display = 'none';
+    document.getElementById('authHeading').style.display = 'none';
+    document.getElementById('authSub').style.display = 'none';
+    document.getElementById('authToggle').style.display = 'none';
+    document.getElementById('successTitle').textContent = title;
+    document.getElementById('successSub').textContent = sub;
+    document.getElementById('successState').classList.add('show');
+  }
+
+  // OTP PHONE INPUT
+  function onPhoneInput() {
+    const val = document.getElementById('otpPhone').value.replace(/\s/g,'');
+    document.getElementById('sendOtpBtn').disabled = !/^\d{10}$/.test(val);
+  }
+
+  function sendOTP() {
+    const phone = document.getElementById('otpPhone').value.replace(/\s/g,'');
+    if (!/^\d{10}$/.test(phone)) { showErr('errOtpPhone', true); return; }
+    showErr('errOtpPhone', false);
+    document.getElementById('sentToNum').textContent = '+91 ' + phone;
+    document.getElementById('phoneStep1').style.display = 'none';
+    document.getElementById('phoneStep2').style.display = 'block';
+    document.getElementById('phoneStep2').style.animation = 'fadeUp 0.35s ease';
+    document.querySelectorAll('.otp-input')[0].focus();
+    startTimer();
+  }
+
+  function startTimer() {
+    let secs = 30;
+    document.getElementById('countdown').textContent = secs;
+    document.getElementById('timerText').style.display = 'block';
+    document.getElementById('resendLink').style.display = 'none';
+    clearInterval(otpTimer);
+    otpTimer = setInterval(() => {
+      secs--;
+      document.getElementById('countdown').textContent = secs;
+      if (secs <= 0) {
+        clearInterval(otpTimer);
+        document.getElementById('timerText').style.display = 'none';
+        document.getElementById('resendLink').style.display = 'block';
+      }
+    }, 1000);
+  }
+
+  function resendOTP() {
+    document.querySelectorAll('.otp-input').forEach(i => { i.value=''; i.classList.remove('filled'); });
+    startTimer();
+  }
+
+  function backToPhone() {
+    clearInterval(otpTimer);
+    document.getElementById('phoneStep1').style.display = 'block';
+    document.getElementById('phoneStep2').style.display = 'none';
+    document.getElementById('otpPhone').value = '';
+    document.getElementById('sendOtpBtn').disabled = true;
+  }
+
+  // OTP NAVIGATION
+  function otpNav(el, idx) {
+    el.classList.toggle('filled', el.value.length > 0);
+    if (el.value.length === 1) {
+      const inputs = document.querySelectorAll('.otp-input');
+      if (idx < 5) inputs[idx+1].focus();
+    }
+    el.value = el.value.replace(/[^0-9]/g,'');
+  }
+
+  // Add backspace support for OTP
+  document.querySelectorAll('.otp-input').forEach((inp, idx) => {
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && inp.value === '' && idx > 0) {
+        document.querySelectorAll('.otp-input')[idx-1].focus();
+      }
+    });
+  });
+
+  function verifyOTP() {
+    const otp = [...document.querySelectorAll('.otp-input')].map(i=>i.value).join('');
+    if (otp.length < 6) { alert('Please enter the full 6-digit OTP.'); return; }
+    const btn = document.querySelector('#phoneStep2 .submit-btn');
+    btn.classList.add('loading');
+    btn.textContent = '⏳ Verifying…';
+    setTimeout(() => {
+      clearInterval(otpTimer);
+      showSuccess('Verified! 🌿', 'Your phone number is confirmed. Taking you to your dashboard…');
+    }, 1500);
+  }
+
+  // GOOGLE
+  function googleAuth() {
+    const btn = document.querySelector('.google-btn');
+    btn.textContent = '⏳ Connecting…';
+    setTimeout(() => showSuccess('Google Sign-in Successful! 🎉', 'Welcome to DumpIt! Setting up your account…'), 1500);
+  }
+</script>
+
+</body>
+</html>

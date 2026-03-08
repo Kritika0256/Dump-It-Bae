@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DumpIt — Book a Pickup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid: #2d5a3d;
+      --green-bright: #4a8c5c;
+      --green-light: #7ab88a;
+      --green-pale: #b8d4be;
+      --soil: #6b4226;
+      --cream: #f5f0e8;
+      --cream-dark: #e8e0d0;
+      --gold: #c9a84c;
+      --white: #fafaf7;
+      --error: #c0392b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--green-deep);
+      min-height: 100vh;
+      cursor: none;
+    }
+
+    /* Cursor */
+    .cursor { position: fixed; width: 10px; height: 10px; background: var(--green-bright); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: transform 0.15s; }
+    .cursor-ring { position: fixed; width: 32px; height: 32px; border: 1.5px solid var(--green-bright); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); opacity: 0.5; transition: all 0.25s; }
+
+    /* Grain */
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.35; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.2rem 4rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(245,240,232,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--cream-dark);
+    }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--green-deep); letter-spacing: -0.02em; text-decoration: none; }
+    .logo span { color: var(--green-bright); }
+    .nav-back { display: flex; align-items: center; gap: 0.5rem; color: var(--green-mid); font-size: 0.88rem; text-decoration: none; transition: color 0.2s; }
+    .nav-back:hover { color: var(--green-bright); }
+
+    /* LAYOUT */
+    .booking-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      min-height: 100vh;
+      padding-top: 68px;
+    }
+
+    /* MAIN FORM AREA */
+    .form-area {
+      padding: 4rem 5rem;
+      max-width: 720px;
+    }
+
+    /* PROGRESS */
+    .progress-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 3rem;
+    }
+    .step-dot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      flex: 1;
+    }
+    .step-dot:last-child { flex: 0; }
+    .dot {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--cream-dark);
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--green-mid);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+    }
+    .dot.active { border-color: var(--green-bright); background: var(--green-bright); color: white; box-shadow: 0 0 0 4px rgba(74,140,92,0.15); }
+    .dot.done { border-color: var(--green-deep); background: var(--green-deep); color: white; }
+    .dot.done::after { content: '✓'; }
+    .dot.done .dot-num { display: none; }
+    .step-label { font-size: 0.72rem; color: var(--green-mid); letter-spacing: 0.04em; white-space: nowrap; font-weight: 500; }
+    .step-label.active { color: var(--green-bright); font-weight: 600; }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--cream-dark);
+      margin-bottom: 1.4rem;
+      transition: background 0.4s;
+    }
+    .step-line.done { background: var(--green-deep); }
+
+    /* STEP PANELS */
+    .step-panel { display: none; animation: fadeIn 0.4s ease; }
+    .step-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+
+    .step-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green-deep);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .step-sub { font-size: 0.92rem; color: var(--green-mid); margin-bottom: 2.5rem; font-weight: 300; line-height: 1.5; }
+
+    /* PACKAGE CARDS */
+    .package-options { display: flex; flex-direction: column; gap: 1rem; }
+    .pkg-option {
+      border: 2px solid var(--cream-dark);
+      border-radius: 18px;
+      padding: 1.5rem 1.8rem;
+      background: white;
+      cursor: none;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      position: relative;
+    }
+    .pkg-option:hover { border-color: var(--green-pale); transform: translateX(4px); }
+    .pkg-option.selected { border-color: var(--green-bright); background: rgba(74,140,92,0.04); }
+    .pkg-option.selected .pkg-radio { background: var(--green-bright); border-color: var(--green-bright); }
+    .pkg-option.selected .pkg-radio::after { opacity: 1; }
+    .pkg-radio {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--cream-dark);
+      flex-shrink: 0;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pkg-radio::after { content: ''; width: 8px; height: 8px; background: white; border-radius: 50%; opacity: 0; transition: opacity 0.2s; }
+    .pkg-info { flex: 1; }
+    .pkg-name { font-weight: 600; font-size: 1rem; color: var(--green-deep); margin-bottom: 0.2rem; }
+    .pkg-detail { font-size: 0.82rem; color: var(--green-mid); }
+    .pkg-price-tag {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+    .pkg-price-tag small { font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 400; color: var(--green-mid); }
+    .pkg-badge {
+      position: absolute;
+      top: -10px; right: 1.5rem;
+      background: var(--gold);
+      color: var(--green-deep);
+      padding: 0.2rem 0.8rem;
+      border-radius: 100px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* DRY WASTE ADDON */
+    .addon-card {
+      margin-top: 2rem;
+      border: 2px solid var(--cream-dark);
+      border-radius: 18px;
+      padding: 1.5rem 1.8rem;
+      background: white;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      cursor: none;
+      transition: all 0.25s;
+    }
+    .addon-card.active { border-color: var(--green-bright); background: rgba(74,140,92,0.04); }
+    .addon-icon { font-size: 2rem; }
+    .addon-info { flex: 1; }
+    .addon-title { font-weight: 600; font-size: 1rem; color: var(--green-deep); }
+    .addon-desc { font-size: 0.82rem; color: var(--green-mid); margin-top: 0.2rem; }
+    .addon-price { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--green-bright); }
+    .toggle {
+      width: 48px; height: 26px;
+      background: var(--cream-dark);
+      border-radius: 100px;
+      position: relative;
+      cursor: none;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: var(--green-bright); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 3px; left: 3px;
+      transition: left 0.3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle.on::after { left: 25px; }
+
+    /* CALENDAR */
+    .calendar-wrapper { margin-bottom: 2rem; }
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+    .cal-month { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--green-deep); }
+    .cal-nav {
+      background: none; border: 1.5px solid var(--cream-dark);
+      width: 34px; height: 34px; border-radius: 50%;
+      cursor: none; color: var(--green-mid); font-size: 0.9rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .cal-nav:hover { border-color: var(--green-bright); color: var(--green-bright); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-day-name { text-align: center; font-size: 0.72rem; font-weight: 600; color: var(--green-mid); letter-spacing: 0.04em; padding: 0.5rem 0; }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      cursor: none;
+      color: var(--green-deep);
+      transition: all 0.2s;
+      border: 1.5px solid transparent;
+    }
+    .cal-day:hover:not(.empty):not(.past) { background: var(--green-pale); }
+    .cal-day.selected { background: var(--green-bright) !important; color: white; font-weight: 600; }
+    .cal-day.today { border-color: var(--green-bright); color: var(--green-bright); font-weight: 600; }
+    .cal-day.past { color: var(--cream-dark); cursor: default; }
+    .cal-day.empty { cursor: default; }
+
+    /* TIME SLOTS */
+    .time-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+    .time-slot {
+      border: 2px solid var(--cream-dark);
+      border-radius: 12px;
+      padding: 0.8rem;
+      text-align: center;
+      cursor: none;
+      transition: all 0.2s;
+      background: white;
+    }
+    .time-slot:hover { border-color: var(--green-pale); }
+    .time-slot.selected { border-color: var(--green-bright); background: rgba(74,140,92,0.06); color: var(--green-bright); font-weight: 600; }
+    .time-slot.unavailable { background: var(--cream-dark); color: var(--green-pale); cursor: default; font-size: 0.8rem; }
+    .time-slot .slot-time { font-size: 0.88rem; font-weight: 500; }
+    .time-slot .slot-avail { font-size: 0.7rem; color: var(--green-light); margin-top: 0.2rem; }
+    .time-slot.unavailable .slot-avail { color: var(--green-pale); }
+
+    /* ADDRESS */
+    .form-group { margin-bottom: 1.5rem; }
+    .form-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--green-mid); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.6rem; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.85rem 1.1rem;
+      border: 2px solid var(--cream-dark);
+      border-radius: 12px;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      color: var(--green-deep);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--green-bright); }
+    .form-input.error, .form-select.error { border-color: var(--error); }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .error-msg { font-size: 0.75rem; color: var(--error); margin-top: 0.3rem; display: none; }
+    .error-msg.show { display: block; }
+
+    /* CONFIRMATION */
+    .confirm-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .confirm-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 1.2rem 1.5rem;
+      background: white;
+      border-radius: 14px;
+      border: 1px solid var(--cream-dark);
+    }
+    .confirm-key { font-size: 0.82rem; color: var(--green-mid); font-weight: 500; }
+    .confirm-val { font-size: 0.92rem; color: var(--green-deep); font-weight: 600; text-align: right; max-width: 55%; }
+    .confirm-edit { font-size: 0.75rem; color: var(--green-bright); cursor: none; margin-top: 0.2rem; text-decoration: underline; }
+
+    /* BUTTONS */
+    .btn-row { display: flex; gap: 1rem; margin-top: 2.5rem; }
+    .btn-next {
+      flex: 1;
+      background: var(--green-deep);
+      color: var(--cream);
+      padding: 1rem 2rem;
+      border-radius: 100px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: none;
+      transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn-next:hover { background: var(--green-bright); box-shadow: 0 10px 30px rgba(74,140,92,0.3); }
+    .btn-back {
+      background: white;
+      color: var(--green-mid);
+      padding: 1rem 1.8rem;
+      border-radius: 100px;
+      border: 2px solid var(--cream-dark);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: none;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { border-color: var(--green-pale); color: var(--green-deep); }
+
+    /* SUCCESS */
+    .success-screen { display: none; text-align: center; padding: 4rem 2rem; animation: fadeIn 0.5s ease; }
+    .success-screen.show { display: block; }
+    .success-icon { font-size: 5rem; margin-bottom: 1.5rem; display: block; animation: bounceIn 0.6s ease; }
+    @keyframes bounceIn { 0% { transform: scale(0); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    .success-title { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--green-deep); margin-bottom: 1rem; }
+    .success-sub { color: var(--green-mid); font-size: 1rem; line-height: 1.6; max-width: 400px; margin: 0 auto 2rem; }
+    .booking-id { background: white; border: 2px solid var(--green-pale); border-radius: 14px; padding: 1rem 2rem; display: inline-block; margin-bottom: 2rem; }
+    .booking-id span { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--green-bright); }
+    .success-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* SIDEBAR */
+    .sidebar {
+      background: var(--green-deep);
+      padding: 5rem 2.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      position: sticky;
+      top: 68px;
+      height: calc(100vh - 68px);
+      overflow-y: auto;
+    }
+    .sidebar-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--cream); font-weight: 700; margin-bottom: 0.5rem; }
+    .summary-item { display: flex; align-items: flex-start; gap: 0.8rem; padding: 1rem; background: rgba(255,255,255,0.07); border-radius: 12px; }
+    .summary-item .s-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .summary-item .s-key { font-size: 0.72rem; color: var(--green-pale); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.2rem; }
+    .summary-item .s-val { font-size: 0.9rem; color: var(--cream); font-weight: 500; }
+    .summary-item .s-val.empty { color: rgba(255,255,255,0.25); font-style: italic; font-weight: 300; }
+    .divider { height: 1px; background: rgba(255,255,255,0.1); }
+    .total-row { display: flex; justify-content: space-between; align-items: center; }
+    .total-label { font-size: 0.82rem; color: var(--green-pale); }
+    .total-val { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--cream); font-weight: 700; }
+    .total-val small { font-size: 0.7rem; font-family: 'DM Sans', sans-serif; color: var(--green-pale); }
+    .credits-badge { display: flex; gap: 0.6rem; align-items: center; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3); border-radius: 10px; padding: 0.8rem 1rem; }
+    .credits-badge .cb-icon { font-size: 1.1rem; }
+    .credits-badge .cb-text { font-size: 0.78rem; color: var(--gold); line-height: 1.4; }
+    .eco-note { font-size: 0.75rem; color: var(--green-pale); line-height: 1.5; text-align: center; margin-top: auto; }
+
+    @media (max-width: 900px) {
+      .booking-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .form-area { padding: 2rem 1.5rem; max-width: 100%; }
+      nav { padding: 1.2rem 1.5rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .time-slots { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="index.html" class="logo">Dump<span>It</span></a>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="booking-layout">
+
+  <!-- FORM AREA -->
+  <div class="form-area">
+
+    <!-- Progress -->
+    <div class="progress-bar" id="progressBar">
+      <div class="step-dot">
+        <div class="dot active" id="dot1"><span class="dot-num">1</span></div>
+        <div class="step-label active" id="lbl1">Package</div>
+      </div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot">
+        <div class="dot" id="dot2"><span class="dot-num">2</span></div>
+        <div class="step-label" id="lbl2">Schedule</div>
+      </div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot">
+        <div class="dot" id="dot3"><span class="dot-num">3</span></div>
+        <div class="step-label" id="lbl3">Address</div>
+      </div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-dot">
+        <div class="dot" id="dot4"><span class="dot-num">4</span></div>
+        <div class="step-label" id="lbl4">Confirm</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Package -->
+    <div class="step-panel active" id="step1">
+      <h2 class="step-heading">Choose your plan</h2>
+      <p class="step-sub">Pick the package that suits your household. You can upgrade anytime.</p>
+
+      <div class="package-options">
+        <div class="pkg-option" id="pkg-15" onclick="selectPackage('15 Days', 299, this)">
+          <div class="pkg-radio"></div>
+          <div class="pkg-info">
+            <div class="pkg-name">15-Day Plan</div>
+            <div class="pkg-detail">15 daily pickups · Wet waste · Carbon credits</div>
+          </div>
+          <div class="pkg-price-tag">₹299 <small>/ 15 days</small></div>
+        </div>
+        <div class="pkg-option" id="pkg-monthly" onclick="selectPackage('Monthly', 499, this)">
+          <div class="pkg-badge">Most Popular</div>
+          <div class="pkg-radio"></div>
+          <div class="pkg-info">
+            <div class="pkg-name">Monthly Plan</div>
+            <div class="pkg-detail">30 daily pickups · Wet + Dry waste · 2x credits</div>
+          </div>
+          <div class="pkg-price-tag">₹499 <small>/ month</small></div>
+        </div>
+        <div class="pkg-option" id="pkg-quarterly" onclick="selectPackage('Quarterly', 1199, this)">
+          <div class="pkg-radio"></div>
+          <div class="pkg-info">
+            <div class="pkg-name">Quarterly Plan</div>
+            <div class="pkg-detail">90 daily pickups · All waste types · 3x credits + bulk</div>
+          </div>
+          <div class="pkg-price-tag">₹1199 <small>/ 3 months</small></div>
+        </div>
+      </div>
+
+      <!-- Dry Waste Add-on -->
+      <div class="addon-card" id="addonCard" onclick="toggleAddon()">
+        <div class="addon-icon">♻️</div>
+        <div class="addon-info">
+          <div class="addon-title">Add Dry Waste Collection</div>
+          <div class="addon-desc">Paper, plastic, metal — we sort and recycle it for you</div>
+        </div>
+        <div class="addon-price">+₹99</div>
+        <div class="toggle" id="addonToggle"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="goToStep(2)">Continue to Schedule →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Schedule -->
+    <div class="step-panel" id="step2">
+      <h2 class="step-heading">Pick your schedule</h2>
+      <p class="step-sub">Select your preferred start date and daily pickup time slot.</p>
+
+      <div class="calendar-wrapper">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+          <div class="cal-month" id="calMonth"></div>
+          <button class="cal-nav" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <h3 style="font-size:0.82rem;font-weight:600;color:var(--green-mid);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1rem;">Select Time Slot</h3>
+      <div class="time-slots">
+        <div class="time-slot" onclick="selectTime('6:00 AM – 8:00 AM', this)">
+          <div class="slot-time">6:00 – 8:00 AM</div>
+          <div class="slot-avail">Available</div>
+        </div>
+        <div class="time-slot" onclick="selectTime('8:00 AM – 10:00 AM', this)">
+          <div class="slot-time">8:00 – 10:00 AM</div>
+          <div class="slot-avail">Available</div>
+        </div>
+        <div class="time-slot unavailable">
+          <div class="slot-time">10:00 – 12:00 PM</div>
+          <div class="slot-avail">Fully booked</div>
+        </div>
+        <div class="time-slot" onclick="selectTime('12:00 PM – 2:00 PM', this)">
+          <div class="slot-time">12:00 – 2:00 PM</div>
+          <div class="slot-avail">Available</div>
+        </div>
+        <div class="time-slot" onclick="selectTime('4:00 PM – 6:00 PM', this)">
+          <div class="slot-time">4:00 – 6:00 PM</div>
+          <div class="slot-avail">Available</div>
+        </div>
+        <div class="time-slot" onclick="selectTime('6:00 PM – 8:00 PM', this)">
+          <div class="slot-time">6:00 – 8:00 PM</div>
+          <div class="slot-avail">Available</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goToStep(1)">← Back</button>
+        <button class="btn-next" onclick="goToStep(3)">Continue to Address →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Address -->
+    <div class="step-panel" id="step3">
+      <h2 class="step-heading">Your pickup address</h2>
+      <p class="step-sub">Tell us where to collect from. Make sure it's accessible for our team.</p>
+
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="inputName" placeholder="Rahul Sharma" oninput="updateAddress()"/>
+        <div class="error-msg" id="errName">Please enter your name</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" class="form-input" id="inputPhone" placeholder="+91 98765 43210" oninput="updateAddress()"/>
+        <div class="error-msg" id="errPhone">Please enter a valid phone number</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Flat / House No. & Building</label>
+        <input type="text" class="form-input" id="inputFlat" placeholder="Flat 4B, Sunrise Apartments" oninput="updateAddress()"/>
+        <div class="error-msg" id="errFlat">Please enter your flat/house number</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Street / Area</label>
+        <input type="text" class="form-input" id="inputStreet" placeholder="MG Road, Koramangala" oninput="updateAddress()"/>
+        <div class="error-msg" id="errStreet">Please enter your street/area</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <input type="text" class="form-input" id="inputCity" placeholder="Bengaluru" oninput="updateAddress()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">PIN Code</label>
+          <input type="text" class="form-input" id="inputPin" placeholder="560095" oninput="updateAddress()"/>
+          <div class="error-msg" id="errPin">Please enter a valid 6-digit PIN code</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Landmark (optional)</label>
+        <input type="text" class="form-input" id="inputLandmark" placeholder="Near Reliance Fresh" oninput="updateAddress()"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Special Instructions (optional)</label>
+        <textarea class="form-textarea" id="inputNotes" placeholder="e.g. Leave bag outside door, call before arriving…" oninput="updateAddress()"></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goToStep(2)">← Back</button>
+        <button class="btn-next" onclick="validateAndNext()">Review Booking →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Confirm -->
+    <div class="step-panel" id="step4">
+      <h2 class="step-heading">Review & confirm</h2>
+      <p class="step-sub">Everything look good? Go ahead and confirm your booking.</p>
+
+      <div class="confirm-summary">
+        <div class="confirm-row">
+          <div>
+            <div class="confirm-key">📦 Package</div>
+            <div class="confirm-edit" onclick="goToStep(1)">Change</div>
+          </div>
+          <div class="confirm-val" id="c-pkg">—</div>
+        </div>
+        <div class="confirm-row">
+          <div>
+            <div class="confirm-key">♻️ Dry Waste Add-on</div>
+            <div class="confirm-edit" onclick="goToStep(1)">Change</div>
+          </div>
+          <div class="confirm-val" id="c-addon">—</div>
+        </div>
+        <div class="confirm-row">
+          <div>
+            <div class="confirm-key">📅 Start Date</div>
+            <div class="confirm-edit" onclick="goToStep(2)">Change</div>
+          </div>
+          <div class="confirm-val" id="c-date">—</div>
+        </div>
+        <div class="confirm-row">
+          <div>
+            <div class="confirm-key">🕐 Time Slot</div>
+            <div class="confirm-edit" onclick="goToStep(2)">Change</div>
+          </div>
+          <div class="confirm-val" id="c-time">—</div>
+        </div>
+        <div class="confirm-row">
+          <div>
+            <div class="confirm-key">📍 Pickup Address</div>
+            <div class="confirm-edit" onclick="goToStep(3)">Change</div>
+          </div>
+          <div class="confirm-val" id="c-address" style="font-size:0.83rem;">—</div>
+        </div>
+        <div class="confirm-row" style="background:var(--green-deep);border:none;">
+          <div class="confirm-key" style="color:var(--green-pale);font-size:1rem;font-weight:600;">Total Amount</div>
+          <div class="confirm-val" style="color:var(--cream);font-family:'Playfair Display',serif;font-size:1.8rem;" id="c-total">—</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goToStep(3)">← Back</button>
+        <button class="btn-next" onclick="confirmBooking()" style="background:var(--green-bright);">✓ Confirm Booking</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="successScreen">
+      <span class="success-icon">🌿</span>
+      <h2 class="success-title">You're all set!</h2>
+      <p class="success-sub">Your pickup has been booked. Our team will be at your door on schedule. Get ready to earn those carbon tokens! 🪙</p>
+      <div class="booking-id">
+        Booking ID: <span id="bookingId"></span>
+      </div>
+      <div class="success-actions">
+        <button class="btn-next" style="flex:none;padding:0.9rem 2rem;" onclick="window.location.href='index.html'">← Back to Home</button>
+        <button class="btn-back" onclick="resetForm()">Book Another</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-title">Your Booking Summary</div>
+    </div>
+
+    <div class="summary-item">
+      <div class="s-icon">📦</div>
+      <div>
+        <div class="s-key">Package</div>
+        <div class="s-val empty" id="s-pkg">Not selected yet</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="s-icon">♻️</div>
+      <div>
+        <div class="s-key">Dry Waste Add-on</div>
+        <div class="s-val empty" id="s-addon">Not added</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="s-icon">📅</div>
+      <div>
+        <div class="s-key">Start Date</div>
+        <div class="s-val empty" id="s-date">Not selected</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="s-icon">🕐</div>
+      <div>
+        <div class="s-key">Time Slot</div>
+        <div class="s-val empty" id="s-time">Not selected</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="s-icon">📍</div>
+      <div>
+        <div class="s-key">Address</div>
+        <div class="s-val empty" id="s-address">Not entered</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="total-row">
+      <div class="total-label">Total</div>
+      <div class="total-val" id="s-total">₹0 <small>/ period</small></div>
+    </div>
+
+    <div class="credits-badge">
+      <div class="cb-icon">🪙</div>
+      <div class="cb-text">You'll earn <strong id="s-credits">0 credits</strong> from this plan. Converted to carbon tokens after each pickup!</div>
+    </div>
+
+    <div class="eco-note">🌱 Every booking diverts waste from landfills and helps build a cleaner neighbourhood.</div>
+  </div>
+
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx+'px'; cursor.style.top = my+'px'; });
+  (function animRing() { rx += (mx-rx)*0.12; ry += (my-ry)*0.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); })();
+  document.querySelectorAll('button,a,.pkg-option,.addon-card,.cal-day,.time-slot,.confirm-edit').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.transform='translate(-50%,-50%) scale(1.6)'; ring.style.transform='translate(-50%,-50%) scale(1.4)'; ring.style.opacity='0.3'; });
+    el.addEventListener('mouseleave', () => { cursor.style.transform='translate(-50%,-50%) scale(1)'; ring.style.transform='translate(-50%,-50%) scale(1)'; ring.style.opacity='0.5'; });
+  });
+
+  // State
+  let state = { pkg: null, pkgPrice: 0, addon: false, date: null, time: null, name:'', phone:'', address:'' };
+  let currentStep = 1;
+
+  // PACKAGE
+  function selectPackage(name, price, el) {
+    document.querySelectorAll('.pkg-option').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    state.pkg = name; state.pkgPrice = price;
+    updateSidebar();
+  }
+
+  // ADDON
+  function toggleAddon() {
+    state.addon = !state.addon;
+    const toggle = document.getElementById('addonToggle');
+    const card = document.getElementById('addonCard');
+    toggle.classList.toggle('on', state.addon);
+    card.classList.toggle('active', state.addon);
+    updateSidebar();
+  }
+
+  // CALENDAR
+  let calDate = new Date();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  function renderCalendar() {
+    const y = calDate.getFullYear(), m = calDate.getMonth();
+    document.getElementById('calMonth').textContent = months[m] + ' ' + y;
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    days.forEach(d => { const el = document.createElement('div'); el.className='cal-day-name'; el.textContent=d; grid.appendChild(el); });
+    const first = new Date(y, m, 1).getDay();
+    for (let i = 0; i < first; i++) { const el = document.createElement('div'); el.className='cal-day empty'; grid.appendChild(el); }
+    const daysInMonth = new Date(y, m+1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const el = document.createElement('div');
+      const thisDate = new Date(y, m, d);
+      el.className = 'cal-day';
+      el.textContent = d;
+      if (thisDate < today) el.classList.add('past');
+      else if (thisDate.getTime() === today.getTime()) el.classList.add('today');
+      if (state.date && state.date.getTime() === thisDate.getTime()) el.classList.add('selected');
+      el.onclick = () => selectDate(thisDate, el);
+      grid.appendChild(el);
+    }
+  }
+
+  function selectDate(date, el) {
+    if (date < today) return;
+    state.date = date;
+    document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+    el.classList.add('selected');
+    updateSidebar();
+  }
+
+  function changeMonth(dir) {
+    calDate.setMonth(calDate.getMonth() + dir);
+    renderCalendar();
+  }
+
+  // TIME
+  function selectTime(slot, el) {
+    if (el.classList.contains('unavailable')) return;
+    document.querySelectorAll('.time-slot:not(.unavailable)').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    state.time = slot;
+    updateSidebar();
+  }
+
+  // ADDRESS
+  function updateAddress() {
+    const flat = document.getElementById('inputFlat').value;
+    const street = document.getElementById('inputStreet').value;
+    const city = document.getElementById('inputCity').value;
+    const pin = document.getElementById('inputPin').value;
+    const parts = [flat, street, city, pin].filter(Boolean);
+    state.address = parts.join(', ') || '';
+    state.name = document.getElementById('inputName').value;
+    state.phone = document.getElementById('inputPhone').value;
+    updateSidebar();
+  }
+
+  // SIDEBAR
+  function updateSidebar() {
+    const total = state.pkgPrice + (state.addon ? 99 : 0);
+    const credits = state.pkg === '15 Days' ? 150 : state.pkg === 'Monthly' ? 300 : state.pkg === 'Quarterly' ? 900 : 0;
+
+    setSVal('s-pkg', state.pkg ? `${state.pkg} — ₹${state.pkgPrice}` : null);
+    setSVal('s-addon', state.addon ? 'Yes — ₹99/period' : null, state.addon ? '' : 'Not added');
+    setSVal('s-date', state.date ? state.date.toDateString() : null);
+    setSVal('s-time', state.time);
+    setSVal('s-address', state.address || null);
+    document.getElementById('s-total').innerHTML = `₹${total} <small>/ period</small>`;
+    document.getElementById('s-credits').textContent = credits + (state.addon ? '+' : '') + ' credits';
+  }
+
+  function setSVal(id, val, fallback) {
+    const el = document.getElementById(id);
+    if (val) { el.textContent = val; el.classList.remove('empty'); }
+    else { el.textContent = fallback || 'Not selected'; el.classList.add('empty'); }
+  }
+
+  // NAVIGATION
+  function goToStep(step) {
+    if (step === 2 && !state.pkg) { alert('Please select a package first.'); return; }
+    if (step === 3 && (!state.date || !state.time)) { alert('Please select a date and time slot.'); return; }
+
+    document.getElementById(`step${currentStep}`).classList.remove('active');
+    currentStep = step;
+    document.getElementById(`step${currentStep}`).classList.add('active');
+    updateProgress();
+    if (step === 4) fillConfirmation();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress() {
+    for (let i = 1; i <= 4; i++) {
+      const dot = document.getElementById(`dot${i}`);
+      const lbl = document.getElementById(`lbl${i}`);
+      dot.classList.remove('active','done');
+      lbl.classList.remove('active');
+      if (i < currentStep) { dot.classList.add('done'); }
+      else if (i === currentStep) { dot.classList.add('active'); lbl.classList.add('active'); }
+      if (i < 4) {
+        const line = document.getElementById(`line${i}`);
+        line.classList.toggle('done', i < currentStep);
+      }
+    }
+  }
+
+  function validateAndNext() {
+    let valid = true;
+    const fields = [
+      {id:'inputName', err:'errName', check: v => v.trim().length > 1},
+      {id:'inputPhone', err:'errPhone', check: v => /^[+\d\s]{8,15}$/.test(v.trim())},
+      {id:'inputFlat', err:'errFlat', check: v => v.trim().length > 1},
+      {id:'inputStreet', err:'errStreet', check: v => v.trim().length > 1},
+      {id:'inputPin', err:'errPin', check: v => /^\d{6}$/.test(v.trim())},
+    ];
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const err = document.getElementById(f.err);
+      if (!f.check(el.value)) { el.classList.add('error'); err.classList.add('show'); valid = false; }
+      else { el.classList.remove('error'); err.classList.remove('show'); }
+    });
+    if (valid) goToStep(4);
+  }
+
+  function fillConfirmation() {
+    const total = state.pkgPrice + (state.addon ? 99 : 0);
+    document.getElementById('c-pkg').textContent = `${state.pkg} Plan — ₹${state.pkgPrice}`;
+    document.getElementById('c-addon').textContent = state.addon ? 'Yes — +₹99' : 'Not added';
+    document.getElementById('c-date').textContent = state.date ? state.date.toDateString() : '—';
+    document.getElementById('c-time').textContent = state.time || '—';
+    document.getElementById('c-address').textContent = `${state.name} · ${state.phone}\n${state.address}`;
+    document.getElementById('c-total').textContent = `₹${total}`;
+  }
+
+  function confirmBooking() {
+    const id = 'DI' + Date.now().toString().slice(-6);
+    document.getElementById('bookingId').textContent = id;
+    document.getElementById('step4').classList.remove('active');
+    document.getElementById('progressBar').style.display = 'none';
+    document.getElementById('successScreen').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    state = { pkg: null, pkgPrice: 0, addon: false, date: null, time: null, name:'', phone:'', address:'' };
+    currentStep = 1;
+    document.getElementById('successScreen').classList.remove('show');
+    document.getElementById('progressBar').style.display = 'flex';
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step1').classList.add('active');
+    updateProgress();
+    updateSidebar();
+    document.querySelectorAll('.pkg-option').forEach(p => p.classList.remove('selected'));
+    document.getElementById('addonToggle').classList.remove('on');
+    document.getElementById('addonCard').classList.remove('active');
+    document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
+    document.querySelectorAll('.form-input, .form-textarea').forEach(i => i.value = '');
+  }
+
+  // Init
+  renderCalendar();
+  updateSidebar();
+</script>
+</body>
+</html>

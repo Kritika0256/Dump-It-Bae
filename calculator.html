@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DumpIt — Waste Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid: #2d5a3d;
+      --green-bright: #4a8c5c;
+      --green-light: #7ab88a;
+      --green-pale: #b8d4be;
+      --soil: #6b4226;
+      --cream: #f5f0e8;
+      --cream-dark: #e8e0d0;
+      --gold: #c9a84c;
+      --white: #fafaf7;
+      --wet: #3d8b6e;
+      --dry: #7a6b3d;
+      --bulk: #5a7a3d;
+      --ewaste: #3d5a8b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--green-deep);
+      color: var(--cream);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1000; opacity: 0.5;
+    }
+
+    /* Ambient blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 500px; height: 500px; background: rgba(74,140,92,0.12); top: -100px; right: -100px; }
+    .blob-2 { width: 400px; height: 400px; background: rgba(201,168,76,0.07); bottom: -100px; left: -50px; }
+    .blob-3 { width: 300px; height: 300px; background: rgba(61,139,110,0.08); top: 40%; left: 40%; }
+
+    /* Cursor */
+    .cursor { position: fixed; width: 10px; height: 10px; background: var(--green-light); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: transform 0.15s, background 0.2s; }
+    .cursor-ring { position: fixed; width: 34px; height: 34px; border: 1.5px solid var(--green-light); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); opacity: 0.4; transition: all 0.25s; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.2rem 4rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(26,58,42,0.85); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--cream); letter-spacing: -0.02em; text-decoration: none; }
+    .logo span { color: var(--green-light); }
+    .nav-back { display: flex; align-items: center; gap: 0.5rem; color: var(--green-pale); font-size: 0.88rem; text-decoration: none; transition: color 0.2s; }
+    .nav-back:hover { color: var(--green-light); }
+
+    /* HERO HEADER */
+    .calc-header {
+      padding: 8rem 6rem 3rem;
+      position: relative; z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 3rem;
+    }
+    .calc-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--green-pale);
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      width: fit-content;
+    }
+    .calc-eyebrow::before { content: ''; width: 6px; height: 6px; background: var(--green-light); border-radius: 50%; }
+    .calc-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--cream);
+    }
+    .calc-title em { font-style: italic; color: var(--green-light); }
+    .calc-sub {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: var(--green-pale);
+      font-weight: 300;
+      line-height: 1.6;
+      max-width: 480px;
+    }
+    .household-selector {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.6rem;
+    }
+    .hs-label { font-size: 0.75rem; color: var(--green-pale); letter-spacing: 0.06em; text-transform: uppercase; }
+    .hs-buttons { display: flex; gap: 0.5rem; }
+    .hs-btn {
+      padding: 0.6rem 1.1rem;
+      border-radius: 100px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      background: transparent;
+      color: var(--green-pale);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: none;
+      transition: all 0.2s;
+    }
+    .hs-btn.active, .hs-btn:hover { background: var(--green-bright); border-color: var(--green-bright); color: white; }
+
+    /* MAIN GRID */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 2rem;
+      padding: 0 6rem 6rem;
+      position: relative; z-index: 2;
+    }
+
+    /* INPUT PANEL */
+    .input-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* WASTE CARD */
+    .waste-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 24px;
+      padding: 2rem;
+      transition: border-color 0.3s, background 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .waste-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 24px 24px 0 0;
+      opacity: 0.6;
+    }
+    .waste-card.wet::before { background: linear-gradient(90deg, #3d8b6e, #7ab88a); }
+    .waste-card.dry::before { background: linear-gradient(90deg, #c9a84c, #e8c96e); }
+    .waste-card.bulk::before { background: linear-gradient(90deg, #5a7a3d, #8db87a); }
+    .waste-card.ewaste::before { background: linear-gradient(90deg, #3d5a8b, #6b8bc9); }
+    .waste-card:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); }
+
+    .wc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+    .wc-left { display: flex; align-items: center; gap: 1rem; }
+    .wc-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .wet .wc-icon { background: rgba(61,139,110,0.2); }
+    .dry .wc-icon { background: rgba(201,168,76,0.2); }
+    .bulk .wc-icon { background: rgba(90,122,61,0.2); }
+    .ewaste .wc-icon { background: rgba(61,90,139,0.2); }
+
+    .wc-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--cream); }
+    .wc-desc { font-size: 0.78rem; color: var(--green-pale); margin-top: 0.15rem; }
+    .wc-value-display {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--cream);
+      text-align: right;
+    }
+    .wc-value-display small { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; color: var(--green-pale); font-weight: 300; }
+
+    /* Slider */
+    .slider-wrap { position: relative; }
+    .slider-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 100px;
+      position: relative;
+      margin-bottom: 0.8rem;
+    }
+    .slider-fill {
+      height: 100%;
+      border-radius: 100px;
+      position: absolute;
+      top: 0; left: 0;
+      transition: width 0.1s;
+    }
+    .wet .slider-fill { background: linear-gradient(90deg, #3d8b6e, #7ab88a); }
+    .dry .slider-fill { background: linear-gradient(90deg, #c9a84c, #e8c96e); }
+    .bulk .slider-fill { background: linear-gradient(90deg, #5a7a3d, #8db87a); }
+    .ewaste .slider-fill { background: linear-gradient(90deg, #3d5a8b, #6b8bc9); }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: transparent;
+      outline: none;
+      cursor: none;
+      position: absolute;
+      top: 0; left: 0;
+      margin: 0;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid var(--green-bright);
+      cursor: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 4px 16px rgba(74,140,92,0.4); }
+    .wet input[type=range]::-webkit-slider-thumb { border-color: #3d8b6e; }
+    .dry input[type=range]::-webkit-slider-thumb { border-color: #c9a84c; }
+    .bulk input[type=range]::-webkit-slider-thumb { border-color: #5a7a3d; }
+    .ewaste input[type=range]::-webkit-slider-thumb { border-color: #3d5a8b; }
+
+    .slider-labels {
+      display: flex; justify-content: space-between;
+      font-size: 0.7rem; color: rgba(255,255,255,0.3);
+      margin-top: 0.5rem;
+    }
+
+    /* Frequency toggle */
+    .wc-freq {
+      display: flex; gap: 0.5rem;
+      margin-top: 1.2rem;
+    }
+    .freq-btn {
+      flex: 1;
+      padding: 0.45rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      color: var(--green-pale);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: none;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .freq-btn.active { background: rgba(255,255,255,0.12); color: white; border-color: rgba(255,255,255,0.25); }
+
+    /* RESULTS PANEL */
+    .results-panel {
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .result-header {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green-pale);
+      margin-bottom: 0.2rem;
+    }
+
+    /* Big metric cards */
+    .metric-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 1.6rem;
+      transition: all 0.3s;
+    }
+    .metric-card:hover { background: rgba(255,255,255,0.09); }
+    .metric-label { font-size: 0.75rem; color: var(--green-pale); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .metric-label .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .metric-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--cream);
+      line-height: 1;
+      transition: all 0.4s;
+    }
+    .metric-val.animating { transform: scale(1.05); color: var(--green-light); }
+    .metric-unit { font-size: 0.85rem; color: var(--green-pale); margin-top: 0.3rem; font-weight: 300; }
+
+    .metric-card.co2 { background: linear-gradient(135deg, rgba(61,139,110,0.15), rgba(74,140,92,0.08)); border-color: rgba(61,139,110,0.3); }
+    .metric-card.credits { background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05)); border-color: rgba(201,168,76,0.3); }
+    .metric-card.credits .metric-val { color: var(--gold); }
+
+    /* Waste breakdown bar */
+    .breakdown-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+      padding: 1.6rem;
+    }
+    .breakdown-title { font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 700; color: var(--cream); margin-bottom: 1.2rem; letter-spacing: 0.03em; }
+    .breakdown-bar {
+      display: flex;
+      height: 12px;
+      border-radius: 100px;
+      overflow: hidden;
+      margin-bottom: 1.2rem;
+      gap: 2px;
+    }
+    .bar-seg { height: 100%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); border-radius: 2px; }
+    .bar-seg.wet { background: #3d8b6e; }
+    .bar-seg.dry { background: #c9a84c; }
+    .bar-seg.bulk { background: #5a7a3d; }
+    .bar-seg.ewaste { background: #3d5a8b; }
+
+    .breakdown-legend { display: flex; flex-direction: column; gap: 0.6rem; }
+    .legend-row { display: flex; justify-content: space-between; align-items: center; }
+    .legend-left { display: flex; align-items: center; gap: 0.6rem; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-name { font-size: 0.8rem; color: var(--green-pale); }
+    .legend-pct { font-size: 0.8rem; font-weight: 600; color: var(--cream); }
+
+    /* Package recommendation */
+    .pkg-recommend {
+      background: var(--green-bright);
+      border-radius: 20px;
+      padding: 1.6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .pkg-recommend::before {
+      content: '🌿';
+      position: absolute;
+      font-size: 6rem;
+      right: -1rem;
+      top: -1rem;
+      opacity: 0.15;
+      line-height: 1;
+    }
+    .pkg-rec-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 0.5rem; }
+    .pkg-rec-name { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 0.3rem; }
+    .pkg-rec-reason { font-size: 0.8rem; color: rgba(255,255,255,0.8); line-height: 1.5; margin-bottom: 1.2rem; }
+    .pkg-rec-price { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: white; }
+    .pkg-rec-price small { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; font-weight: 300; opacity: 0.8; }
+    .pkg-rec-btn {
+      display: block;
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.85rem;
+      background: white;
+      color: var(--green-deep);
+      border: none;
+      border-radius: 100px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: none;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+    .pkg-rec-btn:hover { background: var(--cream); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+    /* Cost estimate */
+    .cost-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+      padding: 1.6rem;
+    }
+    .cost-rows { display: flex; flex-direction: column; gap: 0.7rem; }
+    .cost-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .cost-row:last-child { border-bottom: none; }
+    .cost-row-label { font-size: 0.82rem; color: var(--green-pale); }
+    .cost-row-val { font-size: 0.9rem; font-weight: 600; color: var(--cream); }
+    .cost-row.total .cost-row-label { color: var(--cream); font-weight: 600; font-size: 0.9rem; }
+    .cost-row.total .cost-row-val { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); }
+
+    /* Total waste */
+    .total-waste-banner {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.2rem 1.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tw-label { font-size: 0.78rem; color: var(--green-pale); text-transform: uppercase; letter-spacing: 0.06em; }
+    .tw-val { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--cream); }
+
+    /* Reset button */
+    .reset-btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 100px;
+      color: var(--green-pale);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: none;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .reset-btn:hover { border-color: rgba(255,255,255,0.3); color: white; }
+
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; padding: 0 2rem 4rem; }
+      .calc-header { padding: 7rem 2rem 2rem; grid-template-columns: 1fr; gap: 1.5rem; }
+      .household-selector { align-items: flex-start; }
+      .results-panel { position: static; }
+      nav { padding: 1.2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="index.html" class="logo">Dump<span>It</span></a>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</nav>
+
+<!-- HEADER -->
+<div class="calc-header">
+  <div>
+    <div class="calc-eyebrow">🧮 Waste Calculator</div>
+    <h1 class="calc-title">How much waste<br>does your home <em>actually</em><br>produce?</h1>
+    <p class="calc-sub">Slide to estimate your daily waste. We'll show you your environmental impact, carbon credits you'd earn, and the perfect plan for your household.</p>
+  </div>
+  <div class="household-selector">
+    <div class="hs-label">Household Size</div>
+    <div class="hs-buttons">
+      <button class="hs-btn active" onclick="setHousehold(1, this)">1–2</button>
+      <button class="hs-btn" onclick="setHousehold(2, this)">3–4</button>
+      <button class="hs-btn" onclick="setHousehold(3, this)">5–6</button>
+      <button class="hs-btn" onclick="setHousehold(4, this)">7+</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-grid">
+
+  <!-- INPUT PANEL -->
+  <div class="input-panel">
+
+    <!-- Wet Waste -->
+    <div class="waste-card wet">
+      <div class="wc-top">
+        <div class="wc-left">
+          <div class="wc-icon">🍛</div>
+          <div>
+            <div class="wc-name">Wet Waste</div>
+            <div class="wc-desc">Food scraps, vegetable peels, kitchen waste</div>
+          </div>
+        </div>
+        <div class="wc-value-display">
+          <span id="wetVal">0.5</span> <small>kg/day</small>
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track">
+          <div class="slider-fill wet" id="wetFill" style="width:25%"></div>
+          <input type="range" min="0" max="2" step="0.1" value="0.5" oninput="updateSlider('wet', this.value)"/>
+        </div>
+        <div class="slider-labels"><span>0 kg</span><span>0.5</span><span>1</span><span>1.5</span><span>2 kg</span></div>
+      </div>
+      <div class="wc-freq">
+        <button class="freq-btn active" onclick="setFreq('wet','daily',this)">Daily</button>
+        <button class="freq-btn" onclick="setFreq('wet','alt',this)">Alternate</button>
+        <button class="freq-btn" onclick="setFreq('wet','weekly',this)">Weekly</button>
+      </div>
+    </div>
+
+    <!-- Dry Waste -->
+    <div class="waste-card dry">
+      <div class="wc-top">
+        <div class="wc-left">
+          <div class="wc-icon">📦</div>
+          <div>
+            <div class="wc-name">Dry Waste</div>
+            <div class="wc-desc">Plastic, paper, cardboard, metal, glass</div>
+          </div>
+        </div>
+        <div class="wc-value-display">
+          <span id="dryVal">0.3</span> <small>kg/day</small>
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track">
+          <div class="slider-fill dry" id="dryFill" style="width:20%"></div>
+          <input type="range" min="0" max="1.5" step="0.1" value="0.3" oninput="updateSlider('dry', this.value)"/>
+        </div>
+        <div class="slider-labels"><span>0 kg</span><span>0.4</span><span>0.8</span><span>1.1</span><span>1.5 kg</span></div>
+      </div>
+      <div class="wc-freq">
+        <button class="freq-btn active" onclick="setFreq('dry','daily',this)">Daily</button>
+        <button class="freq-btn" onclick="setFreq('dry','alt',this)">Alternate</button>
+        <button class="freq-btn" onclick="setFreq('dry','weekly',this)">Weekly</button>
+      </div>
+    </div>
+
+    <!-- Bulk / Garden -->
+    <div class="waste-card bulk">
+      <div class="wc-top">
+        <div class="wc-left">
+          <div class="wc-icon">🌿</div>
+          <div>
+            <div class="wc-name">Bulk / Garden Waste</div>
+            <div class="wc-desc">Leaves, branches, large household items</div>
+          </div>
+        </div>
+        <div class="wc-value-display">
+          <span id="bulkVal">0.2</span> <small>kg/day</small>
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track">
+          <div class="slider-fill bulk" id="bulkFill" style="width:13%"></div>
+          <input type="range" min="0" max="1.5" step="0.1" value="0.2" oninput="updateSlider('bulk', this.value)"/>
+        </div>
+        <div class="slider-labels"><span>0 kg</span><span>0.4</span><span>0.8</span><span>1.1</span><span>1.5 kg</span></div>
+      </div>
+      <div class="wc-freq">
+        <button class="freq-btn active" onclick="setFreq('bulk','daily',this)">Daily</button>
+        <button class="freq-btn" onclick="setFreq('bulk','alt',this)">Alternate</button>
+        <button class="freq-btn" onclick="setFreq('bulk','weekly',this)">Weekly</button>
+      </div>
+    </div>
+
+    <!-- E-Waste -->
+    <div class="waste-card ewaste">
+      <div class="wc-top">
+        <div class="wc-left">
+          <div class="wc-icon">💻</div>
+          <div>
+            <div class="wc-name">E-Waste</div>
+            <div class="wc-desc">Old electronics, batteries, cables, gadgets</div>
+          </div>
+        </div>
+        <div class="wc-value-display">
+          <span id="ewasteVal">0</span> <small>kg/mo</small>
+        </div>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track">
+          <div class="slider-fill ewaste" id="ewasteFill" style="width:0%"></div>
+          <input type="range" min="0" max="5" step="0.5" value="0" oninput="updateSlider('ewaste', this.value)"/>
+        </div>
+        <div class="slider-labels"><span>0 kg</span><span>1.25</span><span>2.5</span><span>3.75</span><span>5 kg</span></div>
+      </div>
+      <div style="margin-top:1rem;font-size:0.75rem;color:var(--green-pale);line-height:1.5;">
+        📌 E-waste is collected monthly. Higher credits earned per kg due to hazardous material handling.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RESULTS PANEL -->
+  <div class="results-panel">
+
+    <div class="total-waste-banner">
+      <div>
+        <div class="tw-label">Total Daily Waste</div>
+        <div class="tw-val"><span id="totalWaste">1.0</span> kg/day</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="tw-label">Monthly</div>
+        <div class="tw-val"><span id="totalMonthly">30</span> kg</div>
+      </div>
+    </div>
+
+    <!-- CO2 -->
+    <div class="metric-card co2">
+      <div class="metric-label"><div class="dot" style="background:#3d8b6e"></div>Carbon Saved (CO₂)</div>
+      <div class="metric-val" id="co2Val">18.0</div>
+      <div class="metric-unit">kg CO₂ saved per month vs landfill disposal</div>
+    </div>
+
+    <!-- Credits -->
+    <div class="metric-card credits">
+      <div class="metric-label"><div class="dot" style="background:var(--gold)"></div>Carbon Credits Earned</div>
+      <div class="metric-val" id="creditsVal">300</div>
+      <div class="metric-unit">credits/month → convertible to carbon tokens 🪙</div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="breakdown-card">
+      <div class="breakdown-title">Waste Breakdown</div>
+      <div class="breakdown-bar">
+        <div class="bar-seg wet" id="barWet" style="width:50%"></div>
+        <div class="bar-seg dry" id="barDry" style="width:30%"></div>
+        <div class="bar-seg bulk" id="barBulk" style="width:15%"></div>
+        <div class="bar-seg ewaste" id="barEwaste" style="width:5%"></div>
+      </div>
+      <div class="breakdown-legend">
+        <div class="legend-row">
+          <div class="legend-left"><div class="legend-dot" style="background:#3d8b6e"></div><div class="legend-name">Wet Waste</div></div>
+          <div class="legend-pct" id="pctWet">50%</div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-left"><div class="legend-dot" style="background:#c9a84c"></div><div class="legend-name">Dry Waste</div></div>
+          <div class="legend-pct" id="pctDry">30%</div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-left"><div class="legend-dot" style="background:#5a7a3d"></div><div class="legend-name">Bulk / Garden</div></div>
+          <div class="legend-pct" id="pctBulk">15%</div>
+        </div>
+        <div class="legend-row">
+          <div class="legend-left"><div class="legend-dot" style="background:#3d5a8b"></div><div class="legend-name">E-Waste</div></div>
+          <div class="legend-pct" id="pctEwaste">5%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Package recommendation -->
+    <div class="pkg-recommend">
+      <div class="pkg-rec-label">Recommended Plan</div>
+      <div class="pkg-rec-name" id="recPkg">Monthly Plan</div>
+      <div class="pkg-rec-reason" id="recReason">Based on your waste volume, daily pickups give you the best coverage and value.</div>
+      <div class="pkg-rec-price" id="recPrice">₹499 <small>/ month</small></div>
+      <a href="booking.html" class="pkg-rec-btn">Book This Plan →</a>
+    </div>
+
+    <!-- Cost estimate -->
+    <div class="cost-card">
+      <div class="result-header" style="margin-bottom:1rem;">Monthly Cost Estimate</div>
+      <div class="cost-rows">
+        <div class="cost-row">
+          <div class="cost-row-label">Base Plan</div>
+          <div class="cost-row-val" id="costBase">₹499</div>
+        </div>
+        <div class="cost-row">
+          <div class="cost-row-label">Dry Waste Add-on</div>
+          <div class="cost-row-val" id="costAddon">₹99</div>
+        </div>
+        <div class="cost-row">
+          <div class="cost-row-label">E-Waste Collection</div>
+          <div class="cost-row-val" id="costEwaste">—</div>
+        </div>
+        <div class="cost-row">
+          <div class="cost-row-label">Credits Discount</div>
+          <div class="cost-row-val" style="color:var(--green-light)" id="costDiscount">-₹0</div>
+        </div>
+        <div class="cost-row total">
+          <div class="cost-row-label">Est. Total</div>
+          <div class="cost-row-val" id="costTotal">₹598</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()">↺ Reset Calculator</button>
+
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
+  (function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+  document.querySelectorAll('button,a,input[type=range]').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(1.6)';ring.style.opacity='0.25';});
+    el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='0.4';});
+  });
+
+  // State
+  const state = {
+    wet: { val: 0.5, freq: 'daily' },
+    dry: { val: 0.3, freq: 'daily' },
+    bulk: { val: 0.2, freq: 'daily' },
+    ewaste: { val: 0, freq: 'monthly' }
+  };
+  let householdMult = 1.0;
+
+  const freqMultMap = { daily: 1, alt: 0.5, weekly: 1/7, monthly: 1/30 };
+  const maxMap = { wet: 2, dry: 1.5, bulk: 1.5, ewaste: 5 };
+  const co2Map = { wet: 0.5, dry: 0.8, bulk: 0.3, ewaste: 2.0 };
+  const creditMap = { wet: 10, dry: 25, bulk: 8, ewaste: 50 };
+
+  function updateSlider(type, val) {
+    val = parseFloat(val);
+    state[type].val = val;
+    const max = maxMap[type];
+    const pct = (val / max) * 100;
+    document.getElementById(type+'Fill').style.width = pct + '%';
+    document.getElementById(type+'Val').textContent = val.toFixed(1);
+    calculate();
+  }
+
+  function setFreq(type, freq, el) {
+    state[type].freq = freq;
+    el.closest('.wc-freq').querySelectorAll('.freq-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    calculate();
+  }
+
+  function setHousehold(level, el) {
+    document.querySelectorAll('.hs-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    const mults = [1.0, 1.6, 2.2, 3.0];
+    householdMult = mults[level - 1];
+    calculate();
+  }
+
+  function getDailyKg(type) {
+    const s = state[type];
+    const mult = freqMultMap[s.freq] || 1;
+    return s.val * mult * householdMult;
+  }
+
+  function calculate() {
+    const wetKg = getDailyKg('wet');
+    const dryKg = getDailyKg('dry');
+    const bulkKg = getDailyKg('bulk');
+    const ewasteKgDay = state.ewaste.val * householdMult / 30;
+
+    const totalDaily = wetKg + dryKg + bulkKg + ewasteKgDay;
+    const totalMonthly = totalDaily * 30;
+
+    // CO2 saved
+    const co2 = (wetKg * co2Map.wet + dryKg * co2Map.dry + bulkKg * co2Map.bulk + ewasteKgDay * co2Map.ewaste) * 30;
+
+    // Credits
+    const credits = Math.round(
+      (wetKg * creditMap.wet + dryKg * creditMap.dry + bulkKg * creditMap.bulk + ewasteKgDay * creditMap.ewaste) * 30
+    );
+
+    // Breakdown percentages
+    const parts = [wetKg, dryKg, bulkKg, ewasteKgDay];
+    const total = parts.reduce((a,b)=>a+b,0) || 1;
+    const pcts = parts.map(p => Math.round((p/total)*100));
+
+    // Fix rounding
+    const sum = pcts.reduce((a,b)=>a+b,0);
+    pcts[0] += 100 - sum;
+
+    // Update DOM with animation
+    animateVal('co2Val', co2.toFixed(1));
+    animateVal('creditsVal', credits);
+    document.getElementById('totalWaste').textContent = totalDaily.toFixed(2);
+    document.getElementById('totalMonthly').textContent = totalMonthly.toFixed(1);
+
+    // Breakdown
+    ['wet','dry','bulk','ewaste'].forEach((t,i)=>{
+      document.getElementById('bar'+t.charAt(0).toUpperCase()+t.slice(1)).style.width = pcts[i]+'%';
+      document.getElementById('pct'+t.charAt(0).toUpperCase()+t.slice(1)).textContent = pcts[i]+'%';
+    });
+
+    // Package recommendation
+    recommendPackage(totalDaily, dryKg > 0, state.ewaste.val > 0);
+
+    // Cost estimate
+    updateCosts(totalDaily, dryKg > 0, state.ewaste.val > 0, credits);
+  }
+
+  function recommendPackage(dailyKg, hasDry, hasEwaste) {
+    let pkg, price, reason, suffix = '/month';
+    if (dailyKg < 0.5) {
+      pkg = '15-Day Plan'; price = 299; suffix = '/15 days';
+      reason = 'Your waste volume is low — a 15-day plan gives you great coverage without over-committing.';
+    } else if (dailyKg < 1.5) {
+      pkg = 'Monthly Plan'; price = 499;
+      reason = 'Your daily waste fits perfectly into our monthly plan with 2x credits for consistent pickups.';
+    } else {
+      pkg = 'Quarterly Plan'; price = 1199; suffix = '/3 months';
+      reason = 'Your household generates significant waste — the quarterly plan gives maximum savings and 3x credits.';
+    }
+    document.getElementById('recPkg').textContent = pkg;
+    document.getElementById('recReason').textContent = reason;
+    document.getElementById('recPrice').innerHTML = `₹${price} <small>/ ${suffix}</small>`;
+    document.getElementById('costBase').textContent = `₹${price}`;
+  }
+
+  function updateCosts(dailyKg, hasDry, hasEwaste, credits) {
+    const addonCost = hasDry ? 99 : 0;
+    const ewasteCost = hasEwaste ? 49 : 0;
+    const discount = Math.min(Math.floor(credits / 100) * 10, 50);
+    const base = dailyKg < 0.5 ? 299 : dailyKg < 1.5 ? 499 : 1199;
+    const total = base + addonCost + ewasteCost - discount;
+
+    document.getElementById('costAddon').textContent = hasDry ? '₹99' : '—';
+    document.getElementById('costEwaste').textContent = hasEwaste ? '₹49' : '—';
+    document.getElementById('costDiscount').textContent = discount > 0 ? `-₹${discount}` : '-₹0';
+    document.getElementById('costTotal').textContent = `₹${total}`;
+  }
+
+  function animateVal(id, target) {
+    const el = document.getElementById(id);
+    el.classList.add('animating');
+    setTimeout(() => {
+      el.textContent = target;
+      el.classList.remove('animating');
+    }, 200);
+  }
+
+  function resetAll() {
+    state.wet = { val: 0.5, freq: 'daily' };
+    state.dry = { val: 0.3, freq: 'daily' };
+    state.bulk = { val: 0.2, freq: 'daily' };
+    state.ewaste = { val: 0, freq: 'monthly' };
+    householdMult = 1.0;
+
+    document.querySelectorAll('input[type=range]').forEach((el,i) => {
+      const vals = [0.5, 0.3, 0.2, 0];
+      el.value = vals[i];
+      const types = ['wet','dry','bulk','ewaste'];
+      updateSlider(types[i], vals[i]);
+    });
+
+    document.querySelectorAll('.hs-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+    document.querySelectorAll('.freq-btn').forEach(b => {
+      const isFirst = b.textContent.trim() === 'Daily';
+      b.classList.toggle('active', isFirst);
+    });
+
+    calculate();
+  }
+
+  // Init
+  calculate();
+</script>
+
+</body>
+</html>
