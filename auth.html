@@ -595,6 +595,9 @@
 </div>
 
 <script>
+  // ── API BASE URL ──────────────────────────
+  const API = 'http://localhost:5000/api';
+
   // Cursor
   const cursor = document.getElementById('cursor');
   const ring = document.getElementById('cursorRing');
@@ -607,8 +610,8 @@
   });
 
   // STATE
-  let mode = 'login'; // login | signup
-  let method = 'email'; // email | phone
+  let mode = 'login';
+  let method = 'email';
   let otpTimer = null;
 
   // SWITCH MODE
@@ -618,9 +621,9 @@
     toggle.classList.toggle('signup', m === 'signup');
     document.getElementById('loginToggleBtn').classList.toggle('active', m === 'login');
     document.getElementById('signupToggleBtn').classList.toggle('active', m === 'signup');
-    document.getElementById('authHeading').textContent = m === 'login' ? 'Welcome back 👋' : 'Join DumpIt 🌱';
+    document.getElementById('authHeading').textContent = m === 'login' ? 'Welcome back 👋' : 'Join DumpIt Bae 🌱';
     document.getElementById('authSub').textContent = m === 'login'
-      ? 'Sign in to manage your pickups and track your carbon tokens.'
+      ? 'Sign in to manage your pickups and redeem gift vouchers.'
       : 'Create your account and start your clean-street journey today.';
     document.getElementById('loginEmailFields').style.display = m === 'login' ? 'block' : 'none';
     document.getElementById('signupEmailFields').style.display = m === 'signup' ? 'block' : 'none';
@@ -666,9 +669,9 @@
   }
 
   // SHOW/HIDE ERROR
-  function showErr(id, show) {
+  function showErr(id, show, msg) {
     const el = document.getElementById(id);
-    if (el) el.classList.toggle('show', show);
+    if (el) { el.classList.toggle('show', show); if (msg) el.textContent = msg; }
     return show;
   }
   function markInput(id, err) {
@@ -678,9 +681,23 @@
     el.classList.toggle('success', !err && el.value.length > 0);
   }
 
-  // LOGIN
-  function handleLogin() {
-    const email = document.getElementById('loginEmail').value;
+  // SET BUTTON LOADING STATE
+  function setLoading(btn, loading, originalText) {
+    if (loading) {
+      btn.classList.add('loading');
+      btn.dataset.orig = btn.innerHTML;
+      btn.innerHTML = '⏳ Please wait…';
+      btn.disabled = true;
+    } else {
+      btn.classList.remove('loading');
+      btn.innerHTML = originalText || btn.dataset.orig;
+      btn.disabled = false;
+    }
+  }
+
+  // ── REAL LOGIN API ────────────────────────
+  async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
     const pass = document.getElementById('loginPass').value;
     let valid = true;
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -689,37 +706,98 @@
     if (showErr('errLoginPass', pass.length < 1)) valid = false;
     markInput('loginPass', pass.length < 1);
     if (!valid) return;
-    simulateSubmit(() => showSuccess('Welcome back! 🌿', 'Signing you in to your dashboard…'));
+
+    const btn = event.currentTarget;
+    setLoading(btn, true);
+
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setLoading(btn, false);
+        showErr('errLoginPass', true, data.error || 'Login failed');
+        markInput('loginPass', true);
+        return;
+      }
+
+      // Save token and user info
+      localStorage.setItem('dumpit_token', data.token);
+      localStorage.setItem('dumpit_user', JSON.stringify(data.user));
+
+      setLoading(btn, false);
+      showSuccess('Welcome back! 🌿', `Good to see you, ${data.user.name}! Redirecting to your dashboard…`);
+
+    } catch (err) {
+      setLoading(btn, false);
+      showErr('errLoginEmail', true, '⚠️ Cannot connect to server. Make sure backend is running.');
+    }
   }
 
-  // SIGNUP
-  function handleSignup() {
-    const first = document.getElementById('signupFirst').value;
-    const email = document.getElementById('signupEmail').value;
+  // ── REAL SIGNUP API ───────────────────────
+  async function handleSignup() {
+    const first = document.getElementById('signupFirst').value.trim();
+    const last = document.getElementById('signupLast').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
     const phone = document.getElementById('signupPhone').value.replace(/\s/g,'');
-    const addr = document.getElementById('signupAddr').value;
+    const addr = document.getElementById('signupAddr').value.trim();
     const pass = document.getElementById('signupPass').value;
     const terms = document.getElementById('termsCheck').checked;
+
     let valid = true;
-    if (showErr('errFirst', first.trim().length < 2)) valid = false; markInput('signupFirst', first.trim().length < 2);
+    if (showErr('errFirst', first.length < 2)) valid = false; markInput('signupFirst', first.length < 2);
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (showErr('errSignupEmail', !emailOk)) valid = false; markInput('signupEmail', !emailOk);
     const phoneOk = /^\d{10}$/.test(phone);
     if (showErr('errSignupPhone', !phoneOk)) valid = false; markInput('signupPhone', !phoneOk);
-    if (showErr('errAddr', addr.trim().length < 5)) valid = false; markInput('signupAddr', addr.trim().length < 5);
+    if (showErr('errAddr', addr.length < 5)) valid = false; markInput('signupAddr', addr.length < 5);
     if (showErr('errSignupPass', pass.length < 8)) valid = false; markInput('signupPass', pass.length < 8);
     if (!terms) { alert('Please accept the Terms of Service to continue.'); valid = false; }
     if (!valid) return;
-    simulateSubmit(() => showSuccess('Account created! 🎉', `Welcome to DumpIt, ${first}! Redirecting to your dashboard…`));
-  }
 
-  // SIMULATE ASYNC
-  function simulateSubmit(cb) {
     const btn = event.currentTarget;
-    const orig = btn.innerHTML;
-    btn.classList.add('loading');
-    btn.innerHTML = '⏳ Verifying…';
-    setTimeout(() => { btn.classList.remove('loading'); btn.innerHTML = orig; cb(); }, 1500);
+    setLoading(btn, true);
+
+    try {
+      const res = await fetch(`${API}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${first} ${last}`.trim(),
+          email,
+          phone,
+          password: pass,
+          address: addr
+        })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setLoading(btn, false);
+        if (data.error?.includes('already')) {
+          showErr('errSignupEmail', true, '⚠️ Email already registered. Try signing in.');
+          markInput('signupEmail', true);
+        } else {
+          alert(data.error || 'Signup failed');
+        }
+        return;
+      }
+
+      // Save token and user info
+      localStorage.setItem('dumpit_token', data.token);
+      localStorage.setItem('dumpit_user', JSON.stringify(data.user));
+
+      setLoading(btn, false);
+      showSuccess('Account created! 🎉', `Welcome to DumpIt Bae, ${first}! Setting up your dashboard…`);
+
+    } catch (err) {
+      setLoading(btn, false);
+      alert('⚠️ Cannot connect to server. Make sure backend is running on port 5000.');
+    }
   }
 
   // SUCCESS
@@ -731,6 +809,7 @@
     document.getElementById('successTitle').textContent = title;
     document.getElementById('successSub').textContent = sub;
     document.getElementById('successState').classList.add('show');
+    setTimeout(() => { window.location.href = '/index.html'; }, 2500);
   }
 
   // OTP PHONE INPUT
@@ -746,7 +825,6 @@
     document.getElementById('sentToNum').textContent = '+91 ' + phone;
     document.getElementById('phoneStep1').style.display = 'none';
     document.getElementById('phoneStep2').style.display = 'block';
-    document.getElementById('phoneStep2').style.animation = 'fadeUp 0.35s ease';
     document.querySelectorAll('.otp-input')[0].focus();
     startTimer();
   }
@@ -781,7 +859,6 @@
     document.getElementById('sendOtpBtn').disabled = true;
   }
 
-  // OTP NAVIGATION
   function otpNav(el, idx) {
     el.classList.toggle('filled', el.value.length > 0);
     if (el.value.length === 1) {
@@ -791,7 +868,6 @@
     el.value = el.value.replace(/[^0-9]/g,'');
   }
 
-  // Add backspace support for OTP
   document.querySelectorAll('.otp-input').forEach((inp, idx) => {
     inp.addEventListener('keydown', e => {
       if (e.key === 'Backspace' && inp.value === '' && idx > 0) {
@@ -812,13 +888,11 @@
     }, 1500);
   }
 
-  // GOOGLE
   function googleAuth() {
-    const btn = document.querySelector('.google-btn');
-    btn.textContent = '⏳ Connecting…';
-    setTimeout(() => showSuccess('Google Sign-in Successful! 🎉', 'Welcome to DumpIt! Setting up your account…'), 1500);
+    alert('Google Sign-in coming soon! Please use email for now.');
   }
-</script>
 
+
+</script>
 </body>
 </html>
