@@ -1,45 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DumpIt — Clean Streets, Green Future</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <title>DumpIt Bae — Clean Streets, Real Gifts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --green-deep: #1a3a2a; --green-mid: #2d5a3d; --green-bright: #4a8c5c;
       --green-light: #7ab88a; --green-pale: #b8d4be; --soil: #6b4226;
-      --cream: #f5f0e8; --cream-dark: #e8e0d0; --leaf: #8db87a; --gold: #c9a84c;
+      --cream: #f5f0e8; --cream-dark: #e8e0d0; --cream-mid: #ede6d8;
+      --leaf: #8db87a; --gold: #c9a84c; --gold-light: #f0d07a;
+      --red: #c0392b;
     }
     html { scroll-behavior: smooth; }
     body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--green-deep); overflow-x: hidden; cursor: none; }
-    .cursor { position: fixed; width: 12px; height: 12px; background: var(--green-bright); border-radius: 50%; pointer-events: none; z-index: 9999; transition: transform 0.15s ease; transform: translate(-50%, -50%); }
-    .cursor-ring { position: fixed; width: 36px; height: 36px; border: 1.5px solid var(--green-bright); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%, -50%); transition: all 0.25s ease; opacity: 0.6; }
-    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.4; }
 
-    /* NAV */
-    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 1.5rem 4rem; display: flex; justify-content: space-between; align-items: center; }
-    nav::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(245,240,232,0.95), transparent); z-index: -1; }
-    .logo { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 900; color: var(--green-deep); letter-spacing: -0.02em; text-decoration: none; }
+    /* ── CURSOR ── */
+    .cursor { position: fixed; width: 12px; height: 12px; background: var(--green-bright); border-radius: 50%; pointer-events: none; z-index: 9999; transition: transform 0.15s ease; transform: translate(-50%,-50%); }
+    .cursor-ring { position: fixed; width: 36px; height: 36px; border: 1.5px solid var(--green-bright); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: all 0.25s ease; opacity: 0.6; }
+
+    /* ── GRAIN ── */
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.4; }
+
+    /* ══════════════════════════════════════
+       NAV
+    ══════════════════════════════════════ */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; padding: 1.2rem 4rem; display: flex; justify-content: space-between; align-items: center; }
+    nav::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(245,240,232,0.97), transparent); z-index: -1; backdrop-filter: blur(8px); }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 900; color: var(--green-deep); text-decoration: none; letter-spacing: -0.02em; }
     .logo span { color: var(--green-bright); }
-    .nav-links { display: flex; gap: 2.5rem; list-style: none; align-items: center; }
-    .nav-links a { text-decoration: none; color: var(--green-mid); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+    .nav-links a { text-decoration: none; color: var(--green-mid); font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
     .nav-links a:hover { color: var(--green-bright); }
-    .nav-cta { background: var(--green-deep) !important; color: var(--cream) !important; padding: 0.6rem 1.4rem; border-radius: 100px; }
+    .nav-cta { background: var(--green-deep) !important; color: var(--cream) !important; padding: 0.55rem 1.3rem; border-radius: 100px; font-weight: 600 !important; }
     .nav-cta:hover { background: var(--green-bright) !important; }
+
+    /* Dashboard toggle btn in nav */
+    .nav-dashboard-btn {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--cream-dark); border: 1.5px solid var(--cream-dark);
+      color: var(--green-deep); padding: 0.5rem 1.1rem; border-radius: 100px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all 0.25s; white-space: nowrap;
+    }
+    .nav-dashboard-btn:hover, .nav-dashboard-btn.active { background: var(--green-deep); color: var(--cream); border-color: var(--green-deep); }
+    .nav-dashboard-btn .dot { width: 7px; height: 7px; background: var(--green-bright); border-radius: 50%; }
+    .nav-dashboard-btn.active .dot { background: var(--gold); }
+
+    /* ══════════════════════════════════════
+       LANDING PAGE
+    ══════════════════════════════════════ */
+    #landing { display: block; }
 
     /* HERO */
     .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; position: relative; overflow: hidden; }
-    .hero-left { display: flex; flex-direction: column; justify-content: center; padding: 8rem 4rem 4rem 5rem; position: relative; z-index: 2; }
+    .hero-left { display: flex; flex-direction: column; justify-content: center; padding: 8rem 4rem 4rem 5rem; z-index: 2; }
     .hero-tag { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--green-pale); color: var(--green-deep); padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2rem; width: fit-content; animation: fadeUp 0.8s ease both; }
-    .hero-tag::before { content: ''; width: 6px; height: 6px; background: var(--green-bright); border-radius: 50%; display: inline-block; }
+    .hero-tag::before { content: ''; width: 6px; height: 6px; background: var(--green-bright); border-radius: 50%; }
     .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 5vw, 5rem); line-height: 1.05; font-weight: 900; color: var(--green-deep); letter-spacing: -0.03em; margin-bottom: 1.5rem; animation: fadeUp 0.8s 0.1s ease both; }
     .hero-title em { font-style: italic; color: var(--green-bright); }
     .hero-title .line-soil { color: var(--soil); display: block; }
     .hero-sub { font-size: 1.05rem; line-height: 1.7; color: var(--green-mid); max-width: 420px; margin-bottom: 3rem; font-weight: 300; animation: fadeUp 0.8s 0.2s ease both; }
-    .hero-actions { display: flex; gap: 1rem; align-items: center; animation: fadeUp 0.8s 0.3s ease both; }
-    .btn-primary { background: var(--green-deep); color: var(--cream); padding: 1rem 2rem; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; border: none; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+    .hero-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; animation: fadeUp 0.8s 0.3s ease both; }
+    .btn-primary { background: var(--green-deep); color: var(--cream); padding: 1rem 2rem; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; border: none; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
     .btn-primary:hover { background: var(--green-bright); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(74,140,92,0.35); }
     .btn-primary .arrow { width: 20px; height: 20px; background: var(--green-bright); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: background 0.3s; }
     .btn-primary:hover .arrow { background: white; color: var(--green-deep); }
@@ -49,50 +74,50 @@
     .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--green-deep); line-height: 1; }
     .stat-label { font-size: 0.78rem; color: var(--green-mid); margin-top: 0.3rem; }
 
-    /* HERO RIGHT */
+    /* Hero right */
     .hero-right { position: relative; overflow: hidden; }
-    .hero-bg-shape { position: absolute; right: -10%; top: -5%; width: 110%; height: 110%; background: radial-gradient(ellipse at 60% 40%, var(--green-mid) 0%, var(--green-deep) 60%, #0d2018 100%); border-radius: 40% 0 0 30%; z-index: 0; }
+    .hero-bg-shape { position: absolute; right: -10%; top: -5%; width: 110%; height: 110%; background: radial-gradient(ellipse at 60% 40%, var(--green-mid) 0%, var(--green-deep) 60%, #0d2018 100%); border-radius: 40% 0 0 30%; }
     .hero-illustration { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; }
     .leaf-container { position: relative; width: 340px; height: 340px; display: flex; align-items: center; justify-content: center; }
     .leaf-bg { position: absolute; inset: 0; background: radial-gradient(circle, rgba(122,184,138,0.15) 0%, transparent 70%); border-radius: 50%; animation: pulse 4s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{transform:scale(1);opacity:0.5;} 50%{transform:scale(1.08);opacity:1;} }
-    .truck-icon { font-size: 7rem; text-align: center; animation: float 3s ease-in-out infinite; }
+    .truck-icon { font-size: 7rem; animation: float 3s ease-in-out infinite; }
     @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-15px);} }
     .float-card { position: absolute; background: rgba(255,255,255,0.12); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 1rem 1.3rem; color: white; z-index: 3; }
     .float-card .fc-label { font-size: 0.7rem; opacity: 0.7; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.3rem; }
     .float-card .fc-val { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
     .float-card .fc-sub { font-size: 0.75rem; opacity: 0.8; margin-top: 0.1rem; }
-    .card-points { top: 18%; right: 8%; animation: floatCard 4s 0s ease-in-out infinite; }
+    .card-points { top: 18%; right: 8%; animation: floatCard 4s ease-in-out infinite; }
     .card-pickup { bottom: 22%; left: 5%; animation: floatCard 4s 1.5s ease-in-out infinite; }
-    .card-badge { position: absolute; top: 48%; left: 3%; background: var(--gold); color: var(--green-deep); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 700; animation: floatCard 4s 0.8s ease-in-out infinite; }
-    @keyframes floatCard { 0%,100%{transform:translateY(0px);} 50%{transform:translateY(-8px);} }
+    .card-badge { position: absolute; top: 48%; left: 3%; background: var(--gold); color: var(--green-deep); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 700; animation: floatCard 4s 0.8s ease-in-out infinite; z-index: 3; }
+    @keyframes floatCard { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
     .deco-leaf { position: absolute; opacity: 0.15; font-size: 8rem; z-index: 1; }
     .deco-leaf-1 { top: 10%; left: 5%; transform: rotate(-30deg); }
     .deco-leaf-2 { bottom: 5%; right: 2%; transform: rotate(45deg); font-size: 5rem; opacity: 0.1; }
 
-    /* SECTIONS */
+    /* Shared section styles */
     .section { padding: 7rem 5rem; }
     .section-label { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-bright); margin-bottom: 1rem; }
     .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 700; line-height: 1.15; color: var(--green-deep); letter-spacing: -0.02em; max-width: 560px; margin-bottom: 1.2rem; }
     .section-sub { font-size: 1rem; color: var(--green-mid); max-width: 480px; line-height: 1.7; font-weight: 300; margin-bottom: 4rem; }
 
-    /* FEATURES */
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-    .feature-card { background: white; border-radius: 20px; padding: 2.2rem; border: 1px solid var(--cream-dark); transition: all 0.3s ease; position: relative; overflow: hidden; }
-    .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--green-bright), var(--leaf)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease; }
+    /* Features */
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    .feature-card { background: white; border-radius: 20px; padding: 2.2rem; border: 1px solid var(--cream-dark); transition: all 0.3s; position: relative; overflow: hidden; }
+    .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--green-bright), var(--leaf)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
     .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(26,58,42,0.1); }
     .feature-card:hover::before { transform: scaleX(1); }
     .feature-icon { font-size: 2.2rem; margin-bottom: 1.2rem; display: block; }
     .feature-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--green-deep); margin-bottom: 0.7rem; }
     .feature-desc { font-size: 0.88rem; color: var(--green-mid); line-height: 1.65; font-weight: 300; }
 
-    /* HOW IT WORKS */
+    /* How it works */
     .how-section { background: var(--green-deep); padding: 7rem 5rem; position: relative; overflow: hidden; }
     .how-section::before { content: '🌿'; position: absolute; font-size: 20rem; opacity: 0.04; right: -3rem; top: -3rem; line-height: 1; }
     .how-section .section-label { color: var(--green-pale); }
     .how-section .section-title { color: var(--cream); max-width: 100%; }
     .how-section .section-sub { color: var(--green-pale); }
-    .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-top: 1rem; }
+    .steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; }
     .step { position: relative; }
     .step-num { font-family: 'Playfair Display', serif; font-size: 4rem; font-weight: 900; color: rgba(255,255,255,0.06); line-height: 1; margin-bottom: -0.5rem; }
     .step-icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; }
@@ -101,14 +126,14 @@
     .step-connector { position: absolute; top: 6rem; right: -1rem; width: 2rem; height: 1px; background: rgba(255,255,255,0.15); }
     .step:last-child .step-connector { display: none; }
 
-    /* PACKAGES */
+    /* Packages */
     .packages-section { padding: 7rem 5rem; background: var(--cream-dark); }
-    .packages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1rem; }
-    .package-card { background: white; border-radius: 24px; padding: 2.5rem; border: 1.5px solid var(--cream-dark); transition: all 0.3s ease; position: relative; }
+    .packages-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 1rem; }
+    .package-card { background: white; border-radius: 24px; padding: 2.5rem; border: 1.5px solid var(--cream-dark); transition: all 0.3s; position: relative; }
     .package-card.featured { background: var(--green-deep); border-color: var(--green-deep); transform: scale(1.03); }
     .package-card:hover { transform: translateY(-5px) scale(1.01); box-shadow: 0 25px 70px rgba(26,58,42,0.12); }
     .package-card.featured:hover { transform: translateY(-5px) scale(1.04); }
-    .featured-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--green-deep); padding: 0.3rem 1rem; border-radius: 100px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+    .featured-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--green-deep); padding: 0.3rem 1rem; border-radius: 100px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
     .pkg-period { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-bright); margin-bottom: 0.8rem; }
     .package-card.featured .pkg-period { color: var(--green-pale); }
     .pkg-price { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 900; color: var(--green-deep); line-height: 1; margin-bottom: 0.3rem; }
@@ -119,46 +144,20 @@
     .pkg-features { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; }
     .pkg-features li { font-size: 0.85rem; color: var(--green-mid); display: flex; align-items: center; gap: 0.6rem; }
     .package-card.featured .pkg-features li { color: var(--green-pale); }
-    .pkg-features li::before { content: '✓'; color: var(--green-bright); font-weight: 700; flex-shrink: 0; }
+    .pkg-features li::before { content: '✓'; color: var(--green-bright); font-weight: 700; }
     .package-card.featured .pkg-features li::before { color: var(--green-light); }
     .pkg-btn { width: 100%; padding: 0.9rem; border-radius: 100px; border: 1.5px solid var(--green-deep); background: transparent; color: var(--green-deep); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.3s; }
     .pkg-btn:hover { background: var(--green-deep); color: white; }
     .package-card.featured .pkg-btn { background: var(--cream); border-color: var(--cream); color: var(--green-deep); }
     .package-card.featured .pkg-btn:hover { background: var(--green-bright); border-color: var(--green-bright); color: white; }
 
-    /* ── REDEEM POINTS SECTION ── */
-    .rewards-section {
-      padding: 7rem 5rem;
-      background: var(--green-deep);
-      position: relative;
-      overflow: hidden;
-    }
-    .rewards-section::before {
-      content: '🎁';
-      position: absolute;
-      font-size: 22rem;
-      opacity: 0.04;
-      right: -4rem;
-      bottom: -4rem;
-      line-height: 1;
-    }
+    /* Redeem gifts */
+    .rewards-section { padding: 7rem 5rem; background: var(--green-deep); position: relative; overflow: hidden; }
+    .rewards-section::before { content: '🎁'; position: absolute; font-size: 22rem; opacity: 0.04; right: -4rem; bottom: -4rem; line-height: 1; }
     .rewards-section .section-label { color: var(--green-pale); }
     .rewards-section .section-title { color: var(--cream); max-width: 600px; }
     .rewards-section .section-sub { color: var(--green-pale); }
-
-    /* Points counter banner */
-    .points-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 20px;
-      padding: 1.8rem 2.5rem;
-      margin-bottom: 3.5rem;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-    }
+    .points-banner { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 1.8rem 2.5rem; margin-bottom: 3rem; flex-wrap: wrap; gap: 1.5rem; }
     .points-left { display: flex; align-items: center; gap: 1.5rem; }
     .points-icon { font-size: 2.8rem; }
     .points-label { font-size: 0.78rem; color: var(--green-pale); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.3rem; }
@@ -167,113 +166,36 @@
     .points-bar-wrap { flex: 1; min-width: 200px; }
     .points-bar-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--green-pale); margin-bottom: 0.5rem; }
     .points-bar-track { height: 8px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
-    .points-bar-fill { height: 100%; width: 65%; background: linear-gradient(90deg, var(--gold), #f0d07a); border-radius: 100px; transition: width 1s ease; }
+    .points-bar-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 100px; transition: width 1.2s ease; }
     .points-next { font-size: 0.78rem; color: rgba(201,168,76,0.8); margin-top: 0.4rem; }
-
-    /* How to earn */
-    .earn-row {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 3.5rem;
-      flex-wrap: wrap;
-    }
-    .earn-chip {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 100px;
-      padding: 0.55rem 1.1rem;
-      font-size: 0.82rem;
-      color: var(--cream);
-    }
+    .earn-row { display: flex; gap: 0.8rem; margin-bottom: 3rem; flex-wrap: wrap; }
+    .earn-chip { display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--cream); }
     .earn-chip strong { color: var(--gold); }
-
-    /* Voucher grid */
-    .vouchers-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.2rem;
-    }
-
-    .voucher-card {
-      background: white;
-      border-radius: 20px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      position: relative;
-    }
+    .vouchers-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.2rem; }
+    .voucher-card { background: white; border-radius: 20px; overflow: hidden; transition: all 0.3s; }
     .voucher-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.25); }
-
-    /* Brand header strip */
-    .voucher-brand {
-      padding: 1.3rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    .brand-zomato   { background: #ff3a00; }
-    .brand-swiggy   { background: #fc8019; }
-    .brand-amazon   { background: #232f3e; }
-    .brand-flipkart { background: #2874f0; }
-    .brand-bms      { background: #e2193b; }
-    .brand-bigbasket{ background: #84c225; }
-
-    .brand-logo { font-size: 1.6rem; }
-    .brand-name { font-size: 1rem; font-weight: 700; color: white; letter-spacing: 0.01em; }
-    .brand-tagline { font-size: 0.72rem; color: rgba(255,255,255,0.75); margin-top: 0.1rem; }
-
-    /* Voucher body */
-    .voucher-body { padding: 1.3rem 1.5rem; }
-    .voucher-tiers { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.2rem; }
-    .voucher-tier {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.6rem 0.9rem;
-      border-radius: 10px;
-      background: var(--cream);
-      border: 1.5px solid var(--cream-dark);
-      transition: all 0.2s;
-      cursor: pointer;
-    }
+    .voucher-brand { padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 0.8rem; }
+    .brand-zomato{background:#ff3a00;} .brand-swiggy{background:#fc8019;} .brand-amazon{background:#232f3e;}
+    .brand-flipkart{background:#2874f0;} .brand-bms{background:#e2193b;} .brand-bigbasket{background:#84c225;}
+    .brand-logo { font-size: 1.5rem; }
+    .brand-name { font-size: 0.95rem; font-weight: 700; color: white; }
+    .brand-tagline { font-size: 0.7rem; color: rgba(255,255,255,0.75); margin-top: 0.1rem; }
+    .voucher-body { padding: 1.2rem 1.5rem; }
+    .voucher-tiers { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+    .voucher-tier { display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.9rem; border-radius: 10px; background: var(--cream); border: 1.5px solid var(--cream-dark); transition: all 0.2s; cursor: pointer; }
     .voucher-tier:hover { border-color: var(--green-bright); background: rgba(74,140,92,0.04); }
-    .tier-amount { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--green-deep); }
-    .tier-points { font-size: 0.75rem; font-weight: 600; color: var(--green-bright); background: rgba(74,140,92,0.1); padding: 0.2rem 0.6rem; border-radius: 100px; }
-
-    .redeem-btn {
-      width: 100%;
-      padding: 0.75rem;
-      border-radius: 100px;
-      border: none;
-      background: var(--green-deep);
-      color: white;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.02em;
-    }
-    .redeem-btn:hover { background: var(--green-bright); transform: translateY(-1px); }
-
-    /* Voucher note */
-    .rewards-note {
-      margin-top: 2.5rem;
-      text-align: center;
-      font-size: 0.82rem;
-      color: var(--green-pale);
-      opacity: 0.7;
-    }
-    .rewards-note a { color: var(--gold); text-decoration: none; }
+    .tier-amount { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--green-deep); }
+    .tier-points { font-size: 0.72rem; font-weight: 600; color: var(--green-bright); background: rgba(74,140,92,0.1); padding: 0.2rem 0.6rem; border-radius: 100px; }
+    .redeem-btn { width: 100%; padding: 0.72rem; border-radius: 100px; border: none; background: var(--green-deep); color: white; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .redeem-btn:hover { background: var(--green-bright); }
+    .rewards-note { margin-top: 2rem; text-align: center; font-size: 0.8rem; color: var(--green-pale); opacity: 0.7; }
 
     /* CTA */
     .cta-section { margin: 0 5rem 5rem; background: var(--green-deep); border-radius: 32px; padding: 5rem; text-align: center; position: relative; overflow: hidden; }
     .cta-section::before { content: ''; position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(74,140,92,0.3) 0%, transparent 70%); top: -200px; left: -100px; }
     .cta-section::after { content: ''; position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%); bottom: -150px; right: -50px; }
     .cta-section > * { position: relative; z-index: 2; }
-    .cta-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 900; color: var(--cream); margin-bottom: 1rem; letter-spacing: -0.02em; }
+    .cta-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem,4vw,3.5rem); font-weight: 900; color: var(--cream); margin-bottom: 1rem; letter-spacing: -0.02em; }
     .cta-sub { color: var(--green-pale); font-size: 1rem; max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.6; }
     .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
     .btn-light { background: var(--cream); color: var(--green-deep); padding: 1rem 2.2rem; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; }
@@ -281,25 +203,151 @@
     .btn-outline-light { background: transparent; color: var(--cream); padding: 1rem 2.2rem; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; border: 1.5px solid rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; }
     .btn-outline-light:hover { border-color: var(--cream); background: rgba(255,255,255,0.08); }
 
-    /* FOOTER */
+    /* Footer */
     footer { padding: 3rem 5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--cream-dark); }
     .footer-links { display: flex; gap: 2rem; list-style: none; }
     .footer-links a { text-decoration: none; color: var(--green-mid); font-size: 0.85rem; transition: color 0.2s; }
     .footer-links a:hover { color: var(--green-bright); }
     .footer-copy { font-size: 0.8rem; color: var(--green-mid); }
 
+    /* ══════════════════════════════════════
+       DASHBOARD (hidden by default)
+    ══════════════════════════════════════ */
+    #dashboard { display: none; padding-top: 80px; }
+    #dashboard.visible { display: block; animation: fadeUp 0.4s ease both; }
+
+    /* Dash top bar */
+    .dash-topbar { background: var(--cream); border-bottom: 1px solid var(--cream-dark); padding: 1.5rem 4rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 72px; z-index: 100; }
+    .dash-greeting { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; }
+    .dash-greeting em { font-style: italic; color: var(--green-bright); }
+    .dash-date { font-size: 0.8rem; color: var(--green-mid); margin-top: 0.2rem; }
+
+    /* Dash stat cards */
+    .dash-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.2rem; padding: 2rem 4rem; }
+    .dstat-card { background: white; border: 1px solid var(--cream-dark); border-radius: 20px; padding: 1.5rem; transition: all 0.25s; position: relative; overflow: hidden; }
+    .dstat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 20px 20px 0 0; }
+    .dstat-card.s-green::after { background: linear-gradient(90deg, var(--green-bright), var(--green-light)); }
+    .dstat-card.s-gold::after { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+    .dstat-card.s-soil::after { background: linear-gradient(90deg, var(--soil), #a0673a); }
+    .dstat-card.s-blue::after { background: linear-gradient(90deg, #3d5a8b, #6b8bc9); }
+    .dstat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(26,58,42,0.08); }
+    .dsc-icon { font-size: 1.5rem; margin-bottom: 0.7rem; }
+    .dsc-label { font-size: 0.7rem; color: var(--green-mid); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.3rem; }
+    .dsc-val { font-family: 'Playfair Display', serif; font-size: 1.9rem; font-weight: 900; color: var(--green-deep); line-height: 1; }
+    .dsc-sub { font-size: 0.72rem; color: var(--green-mid); margin-top: 0.3rem; }
+    .dsc-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 100px; margin-top: 0.5rem; background: rgba(74,140,92,0.1); color: var(--green-bright); }
+
+    /* Dash grid layout */
+    .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; padding: 0 4rem 4rem; }
+
+    /* Section card */
+    .dash-card { background: white; border: 1px solid var(--cream-dark); border-radius: 20px; padding: 1.8rem; margin-bottom: 1.5rem; }
+    .dash-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .dash-card-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--green-deep); }
+    .dash-card-action { font-size: 0.78rem; color: var(--green-bright); cursor: pointer; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+    .dash-card-action:hover { color: var(--green-mid); }
+
+    /* Waste stats chart */
+    .chart-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.2rem; }
+    .chart-tab { padding: 0.35rem 0.9rem; border-radius: 100px; font-size: 0.78rem; font-weight: 500; border: 1.5px solid var(--cream-dark); background: transparent; color: var(--green-mid); cursor: pointer; transition: all 0.2s; }
+    .chart-tab.active { background: var(--green-deep); border-color: var(--green-deep); color: white; }
+    .chart-area { height: 180px; position: relative; margin-bottom: 0.8rem; }
+    .chart-svg { width: 100%; height: 100%; }
+    .chart-grid-line { stroke: var(--cream-dark); stroke-width: 1; stroke-dasharray: 4 4; }
+    .chart-line { fill: none; stroke: var(--green-bright); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .chart-area-fill { fill: url(#chartGrad); }
+    .chart-dot { fill: var(--green-bright); stroke: white; stroke-width: 2; }
+    .chart-labels { display: flex; justify-content: space-between; }
+    .chart-label { font-size: 0.7rem; color: var(--green-mid); }
+
+    /* Pickup history */
+    .history-list { display: flex; flex-direction: column; gap: 0.7rem; }
+    .history-item { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1rem; border-radius: 14px; border: 1px solid var(--cream-dark); transition: all 0.2s; }
+    .history-item:hover { border-color: var(--green-pale); background: rgba(74,140,92,0.02); }
+    .hi-date { font-size: 0.75rem; font-weight: 600; color: var(--green-mid); width: 50px; flex-shrink: 0; }
+    .hi-icon { font-size: 1.1rem; }
+    .hi-info { flex: 1; }
+    .hi-type { font-size: 0.85rem; font-weight: 500; color: var(--green-deep); }
+    .hi-weight { font-size: 0.72rem; color: var(--green-mid); margin-top: 0.1rem; }
+    .hi-status { padding: 0.22rem 0.65rem; border-radius: 100px; font-size: 0.68rem; font-weight: 600; }
+    .hi-status.done { background: rgba(74,140,92,0.1); color: var(--green-bright); }
+    .hi-status.missed { background: rgba(192,57,43,0.08); color: var(--red); }
+    .hi-pts { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--gold); min-width: 55px; text-align: right; }
+
+    /* Streak dots */
+    .streak-dots { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .streak-dot { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 600; }
+    .streak-dot.done { background: var(--green-bright); color: white; }
+    .streak-dot.missed { background: rgba(192,57,43,0.1); color: var(--red); }
+    .streak-dot.upcoming { background: var(--cream-dark); color: var(--green-mid); }
+    .streak-dot.today { background: var(--green-deep); color: white; border: 2px solid var(--green-bright); }
+
+    /* Right column */
+    /* Gift points balance card */
+    .gift-balance-card { background: var(--green-deep); border-radius: 20px; padding: 2rem; color: white; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+    .gift-balance-card::before { content: '🎁'; position: absolute; font-size: 7rem; right: -1rem; top: -1rem; opacity: 0.08; line-height: 1; }
+    .gb-label { font-size: 0.7rem; color: var(--green-pale); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    .gb-val { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 900; color: var(--gold-light); line-height: 1; }
+    .gb-sub { font-size: 0.78rem; color: var(--green-pale); margin-top: 0.4rem; margin-bottom: 1.3rem; }
+    .gb-bar-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--green-pale); margin-bottom: 0.4rem; }
+    .gb-bar-track { height: 6px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
+    .gb-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 100px; width: 0; transition: width 1.2s ease; }
+    .gb-next { font-size: 0.72rem; color: var(--green-pale); margin-top: 0.5rem; }
+
+    /* Upcoming pickups */
+    .upcoming-list { display: flex; flex-direction: column; gap: 0.7rem; }
+    .upcoming-item { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1.1rem; border-radius: 14px; border: 1.5px solid var(--cream-dark); position: relative; overflow: hidden; transition: all 0.2s; }
+    .upcoming-item.next { border-color: var(--green-bright); background: rgba(74,140,92,0.03); }
+    .upcoming-item.next::before { content: 'NEXT'; position: absolute; top: 7px; right: 9px; font-size: 0.58rem; font-weight: 800; letter-spacing: 0.08em; color: var(--green-bright); }
+    .ui-date { text-align: center; width: 38px; flex-shrink: 0; }
+    .ui-date-month { font-size: 0.6rem; font-weight: 700; color: var(--green-mid); text-transform: uppercase; }
+    .ui-date-num { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--green-deep); line-height: 1; }
+    .ui-info { flex: 1; }
+    .ui-type { font-size: 0.85rem; font-weight: 500; color: var(--green-deep); }
+    .ui-time { font-size: 0.72rem; color: var(--green-mid); margin-top: 0.1rem; }
+
+    /* Leaderboard */
+    .lb-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .lb-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 0.9rem; border-radius: 12px; transition: background 0.2s; }
+    .lb-item:hover { background: var(--cream-mid); }
+    .lb-item.you { background: rgba(74,140,92,0.08); border: 1px solid rgba(74,140,92,0.2); }
+    .lb-rank { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--green-mid); width: 22px; text-align: center; flex-shrink: 0; }
+    .lb-rank.gold { color: var(--gold); }
+    .lb-rank.silver { color: #8a9ba8; }
+    .lb-rank.bronze { color: #a0673a; }
+    .lb-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white; flex-shrink: 0; }
+    .lb-name { flex: 1; font-size: 0.85rem; font-weight: 500; color: var(--green-deep); }
+    .lb-you-tag { font-size: 0.62rem; font-weight: 700; color: var(--green-bright); background: rgba(74,140,92,0.1); padding: 0.12rem 0.45rem; border-radius: 100px; margin-left: 0.3rem; }
+    .lb-pts { font-family: 'Playfair Display', serif; font-size: 0.9rem; font-weight: 700; color: var(--green-deep); }
+
+    /* Dashboard redeem */
+    .dash-redeem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .dash-redeem-card { border: 1.5px solid var(--cream-dark); border-radius: 14px; padding: 1.1rem; transition: all 0.2s; cursor: pointer; }
+    .dash-redeem-card:hover { border-color: var(--green-pale); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,58,42,0.07); }
+    .drc-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
+    .drc-name { font-size: 0.82rem; font-weight: 600; color: var(--green-deep); margin-bottom: 0.15rem; }
+    .drc-pts { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--gold); }
+
+    /* Animations */
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
     .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .dash-grid { grid-template-columns: 1fr; }
+      .dash-stats { grid-template-columns: repeat(2,1fr); }
+    }
     @media (max-width: 1024px) {
       .hero { grid-template-columns: 1fr; } .hero-right { display: none; }
-      nav { padding: 1.5rem 2rem; } .nav-links { display: none; }
-      .section, .how-section, .packages-section, .rewards-section { padding: 5rem 2rem; }
-      .features-grid, .steps-grid, .packages-grid { grid-template-columns: 1fr; }
-      .vouchers-grid { grid-template-columns: 1fr; }
-      .cta-section { margin: 0 2rem 3rem; padding: 3.5rem 2rem; }
+      nav { padding: 1.2rem 1.5rem; } .nav-links { display: none; }
+      .section, .how-section, .packages-section, .rewards-section { padding: 5rem 1.5rem; }
+      .features-grid, .steps-grid, .packages-grid, .vouchers-grid { grid-template-columns: 1fr; }
+      .cta-section { margin: 0 1.5rem 3rem; padding: 3rem 1.5rem; }
       footer { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
+      .dash-stats { padding: 1.5rem; grid-template-columns: 1fr 1fr; }
+      .dash-grid { padding: 0 1.5rem 3rem; }
+      .dash-topbar { padding: 1rem 1.5rem; }
     }
   </style>
 </head>
@@ -308,337 +356,416 @@
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
-<!-- NAV -->
+<!-- ══ NAV ══ -->
 <nav>
-  <a href="index.html" class="logo">Dump<span>It</span></a>
+  <a href="#" class="logo" onclick="showLanding()">DumpIt <span>Bae</span></a>
   <ul class="nav-links">
-    <li><a href="#how">How it works</a></li>
-    <li><a href="#packages">Packages</a></li>
-    <li><a href="#rewards">Redeem Gifts</a></li>
+    <li><a href="#how" onclick="showLanding()">How it works</a></li>
+    <li><a href="#packages" onclick="showLanding()">Packages</a></li>
+    <li><a href="#rewards" onclick="showLanding()">Redeem Gifts</a></li>
     <li><a href="auth.html">Sign In</a></li>
+    <li>
+      <a href="dashboard.html" class="nav-dashboard-btn" id="dashBtn">
+        <span class="dot"></span> My Dashboard
+      </a>
+    </li>
     <li><a href="booking.html" class="nav-cta">Book Pickup</a></li>
   </ul>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-left">
-    <div class="hero-tag">🌱 Sustainable Waste Management</div>
-    <h1 class="hero-title">
-      Your waste.<br>
-      <em>Our mission.</em>
-      <span class="line-soil">Greener cities.</span>
-    </h1>
-    <p class="hero-sub">Book reliable doorstep waste collection. Earn gift points on every pickup. Redeem them for Zomato, Swiggy, Amazon vouchers and more!</p>
-    <div class="hero-actions">
-      <a href="booking.html" class="btn-primary">Book a Pickup <span class="arrow">→</span></a>
-      <a href="#how" class="btn-secondary">See how it works ↓</a>
-    </div>
-    <div class="hero-stats">
-      <div class="stat-item">
-        <div class="stat-num" id="stat1">12K+</div>
-        <div class="stat-label">Happy households</div>
+<!-- ══════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════ -->
+<div id="landing">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-tag">🌱 Sustainable Waste Management</div>
+      <h1 class="hero-title">
+        Your waste.<br>
+        <em>Our mission.</em>
+        <span class="line-soil">Greener cities.</span>
+      </h1>
+      <p class="hero-sub">Book reliable doorstep waste collection. Earn gift points on every pickup. Redeem them for Zomato, Swiggy, Amazon vouchers and more!</p>
+      <div class="hero-actions">
+        <a href="booking.html" class="btn-primary">Book a Pickup <span class="arrow">→</span></a>
+        <a href="#how" class="btn-secondary">See how it works ↓</a>
       </div>
-      <div class="stat-item">
-        <div class="stat-num" id="stat2">340T</div>
-        <div class="stat-label">Waste collected</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num" id="stat3">98%</div>
-        <div class="stat-label">On-time pickups</div>
+      <div class="hero-stats">
+        <div><div class="stat-num" id="stat1">0</div><div class="stat-label">Happy households</div></div>
+        <div><div class="stat-num" id="stat2">0</div><div class="stat-label">Waste collected</div></div>
+        <div><div class="stat-num" id="stat3">0</div><div class="stat-label">On-time pickups</div></div>
       </div>
     </div>
-  </div>
-
-  <div class="hero-right">
-    <div class="hero-bg-shape"></div>
-    <div class="deco-leaf deco-leaf-1">🍃</div>
-    <div class="deco-leaf deco-leaf-2">🌿</div>
-    <div class="hero-illustration">
-      <div class="leaf-container">
-        <div class="leaf-bg"></div>
-        <div class="truck-icon">♻️</div>
-      </div>
-    </div>
-    <div class="float-card card-points">
-      <div class="fc-label">Your Gift Points</div>
-      <div class="fc-val">1,850 pts 🎁</div>
-      <div class="fc-sub">↑ 310 pts this month</div>
-    </div>
-    <div class="float-card card-pickup">
-      <div class="fc-label">Next Pickup</div>
-      <div class="fc-val">Tomorrow</div>
-      <div class="fc-sub">7:00 AM — 9:00 AM</div>
-    </div>
-    <div class="card-badge">✓ Eco Verified Service</div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="section">
-  <div class="section-label reveal">What We Offer</div>
-  <h2 class="section-title reveal">Everything your neighbourhood needs to stay clean</h2>
-  <p class="section-sub reveal">From flexible scheduling to real gift vouchers — we've built a system that makes waste management effortless and rewarding.</p>
-  <div class="features-grid">
-    <div class="feature-card reveal"><span class="feature-icon">🗓️</span><div class="feature-title">Flexible Packages</div><p class="feature-desc">Choose from 15-day, monthly, or quarterly plans. Set your schedule and we'll show up — rain or shine, no excuses.</p></div>
-    <div class="feature-card reveal"><span class="feature-icon">♻️</span><div class="feature-title">Dry Waste Collection</div><p class="feature-desc">Separate dry waste pickup for recyclables — paper, plastic, metal. We sort it, so you don't have to worry about it.</p></div>
-    <div class="feature-card reveal"><span class="feature-icon">🧮</span><div class="feature-title">Waste Calculator</div><p class="feature-desc">Estimate your household waste output and find the right plan. See your environmental impact in real numbers.</p></div>
-    <div class="feature-card reveal"><span class="feature-icon">🎁</span><div class="feature-title">Redeem Gift Vouchers</div><p class="feature-desc">Every pickup earns points. Redeem them for Zomato, Swiggy, Amazon, Flipkart vouchers — real gifts you'll love.</p></div>
-    <div class="feature-card reveal"><span class="feature-icon">📍</span><div class="feature-title">Real-Time Tracking</div><p class="feature-desc">Know exactly when your pickup truck is arriving. Live location updates so you're never left guessing.</p></div>
-    <div class="feature-card reveal"><span class="feature-icon">📊</span><div class="feature-title">Impact Dashboard</div><p class="feature-desc">See how much waste you've diverted from landfills, CO₂ saved, and how you rank in your neighbourhood.</p></div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="how-section" id="how">
-  <div class="section-label">Simple Process</div>
-  <h2 class="section-title reveal" style="max-width:500px;">From signup to pickup in 4 easy steps</h2>
-  <p class="section-sub reveal">No complicated setup. No confusing contracts. Just clean streets and real rewards.</p>
-  <div class="steps-grid">
-    <div class="step reveal"><div class="step-num">01</div><span class="step-icon">📱</span><div class="step-title">Sign Up</div><p class="step-desc">Create your account in under 2 minutes. Enter your area pincode and we'll confirm availability.</p><div class="step-connector"></div></div>
-    <div class="step reveal"><div class="step-num">02</div><span class="step-icon">📦</span><div class="step-title">Pick a Plan</div><p class="step-desc">Choose a package that suits your household size and waste volume. Add dry waste collection if needed.</p><div class="step-connector"></div></div>
-    <div class="step reveal"><div class="step-num">03</div><span class="step-icon">🚛</span><div class="step-title">We Collect</div><p class="step-desc">Our verified collectors arrive on time at your doorstep. You'll get a notification before arrival.</p><div class="step-connector"></div></div>
-    <div class="step reveal"><div class="step-num">04</div><span class="step-icon">🎁</span><div class="step-title">Earn & Redeem Gifts</div><p class="step-desc">Points added after every pickup. Redeem for Zomato, Swiggy, Amazon vouchers and more — instantly.</p></div>
-  </div>
-</section>
-
-<!-- PACKAGES -->
-<section class="packages-section" id="packages">
-  <div class="section-label reveal">Pricing</div>
-  <h2 class="section-title reveal">Pick the plan that fits your home</h2>
-  <p class="section-sub reveal">All plans include doorstep pickup, real-time tracking, and reward point earning. No hidden charges.</p>
-  <div class="packages-grid">
-    <div class="package-card reveal">
-      <div class="pkg-period">15 Days</div>
-      <div class="pkg-price">₹299 <span>/ 15 days</span></div>
-      <p class="pkg-desc">Perfect for trying us out or smaller households.</p>
-      <ul class="pkg-features"><li>15 pickups over 15 days</li><li>Wet waste collection</li><li>50 pts per pickup</li><li>App tracking</li></ul>
-      <button class="pkg-btn" onclick="window.location.href='booking.html'">Get Started</button>
-    </div>
-    <div class="package-card featured reveal">
-      <div class="featured-badge">Most Popular</div>
-      <div class="pkg-period">Monthly</div>
-      <div class="pkg-price">₹499 <span>/ month</span></div>
-      <p class="pkg-desc">Best value for regular households. Save 20% vs bi-weekly.</p>
-      <ul class="pkg-features"><li>Daily pickups (30 days)</li><li>Wet + Dry waste collection</li><li>100 pts per pickup</li><li>Priority scheduling</li><li>Impact dashboard access</li></ul>
-      <button class="pkg-btn" onclick="window.location.href='booking.html'">Get Started</button>
-    </div>
-    <div class="package-card reveal">
-      <div class="pkg-period">Quarterly</div>
-      <div class="pkg-price">₹1199 <span>/ 3 months</span></div>
-      <p class="pkg-desc">For committed households that want the best deal year-round.</p>
-      <ul class="pkg-features"><li>90 days of daily pickups</li><li>Wet + Dry + Bulk waste</li><li>150 pts per pickup</li><li>Dedicated collector</li><li>Monthly impact report</li></ul>
-      <button class="pkg-btn" onclick="window.location.href='booking.html'">Get Started</button>
-    </div>
-  </div>
-</section>
-
-<!-- ══ REWARDS / REDEEM POINTS SECTION ══ -->
-<section class="rewards-section" id="rewards">
-
-  <div class="section-label reveal">Redeem Gifts</div>
-  <h2 class="section-title reveal">Earn points. Redeem gift vouchers.</h2>
-  <p class="section-sub reveal">Every pickup puts gift points in your wallet. Stack them up and redeem for vouchers from your favourite brands — Zomato, Swiggy, Amazon and more.</p>
-
-  <!-- Points balance banner -->
-  <div class="points-banner reveal">
-    <div class="points-left">
-      <div class="points-icon">🎁</div>
-      <div>
-        <div class="points-label">Your Gift Points Balance</div>
-        <div class="points-value">1,850 pts</div>
-        <div class="points-sub">Enough for a ₹100 voucher right now!</div>
-      </div>
-    </div>
-    <div class="points-bar-wrap">
-      <div class="points-bar-label">
-        <span>Progress to ₹200 voucher</span>
-        <span>1,850 / 2,000 pts</span>
-      </div>
-      <div class="points-bar-track"><div class="points-bar-fill" id="pointsBar"></div></div>
-      <div class="points-next">🔥 Just 150 more points — that's 2 pickups away!</div>
-    </div>
-  </div>
-
-  <!-- How to earn chips -->
-  <div class="earn-row reveal">
-    <div class="earn-chip">🗑️ Wet waste pickup → <strong>+50 pts</strong></div>
-    <div class="earn-chip">📦 Dry waste pickup → <strong>+80 pts</strong></div>
-    <div class="earn-chip">🌿 Bulk waste → <strong>+120 pts</strong></div>
-    <div class="earn-chip">🔥 30-day streak → <strong>+500 pts bonus</strong></div>
-    <div class="earn-chip">👥 Refer a friend → <strong>+200 pts</strong></div>
-  </div>
-
-  <!-- Voucher cards -->
-  <div class="vouchers-grid">
-
-    <!-- Zomato -->
-    <div class="voucher-card reveal">
-      <div class="voucher-brand brand-zomato">
-        <div class="brand-logo">🍕</div>
-        <div><div class="brand-name">Zomato</div><div class="brand-tagline">Food delivery & dining out</div></div>
-      </div>
-      <div class="voucher-body">
-        <div class="voucher-tiers">
-          <div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div>
+    <div class="hero-right">
+      <div class="hero-bg-shape"></div>
+      <div class="deco-leaf deco-leaf-1">🍃</div>
+      <div class="deco-leaf deco-leaf-2">🌿</div>
+      <div class="hero-illustration">
+        <div class="leaf-container">
+          <div class="leaf-bg"></div>
+          <div class="truck-icon">♻️</div>
         </div>
-        <button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button>
+      </div>
+      <div class="float-card card-points">
+        <div class="fc-label">Your Gift Points</div>
+        <div class="fc-val">1,850 pts 🎁</div>
+        <div class="fc-sub">↑ 310 pts this month</div>
+      </div>
+      <div class="float-card card-pickup">
+        <div class="fc-label">Next Pickup</div>
+        <div class="fc-val">Tomorrow</div>
+        <div class="fc-sub">7:00 AM — 9:00 AM</div>
+      </div>
+      <div class="card-badge">✓ Eco Verified Service</div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section">
+    <div class="section-label reveal">What We Offer</div>
+    <h2 class="section-title reveal">Everything your neighbourhood needs to stay clean</h2>
+    <p class="section-sub reveal">From flexible scheduling to real gift vouchers — we've built a system that makes waste management effortless and rewarding.</p>
+    <div class="features-grid">
+      <div class="feature-card reveal"><span class="feature-icon">🗓️</span><div class="feature-title">Flexible Packages</div><p class="feature-desc">Choose from 15-day, monthly, or quarterly plans. Set your schedule and we'll show up — rain or shine.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">♻️</span><div class="feature-title">Dry Waste Collection</div><p class="feature-desc">Separate dry waste pickup for recyclables — paper, plastic, metal. We sort it for you.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">🧮</span><div class="feature-title">Waste Calculator</div><p class="feature-desc">Estimate your household waste output and find the right plan. See your environmental impact.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">🎁</span><div class="feature-title">Redeem Gift Vouchers</div><p class="feature-desc">Every pickup earns gift points. Redeem for Zomato, Swiggy, Amazon, Flipkart vouchers instantly.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">📍</span><div class="feature-title">Real-Time Tracking</div><p class="feature-desc">Know exactly when your pickup truck is arriving. Live updates so you're never left guessing.</p></div>
+      <div class="feature-card reveal"><span class="feature-icon">📊</span><div class="feature-title">Impact Dashboard</div><p class="feature-desc">See waste diverted from landfills, CO₂ saved, and your neighbourhood leaderboard rank.</p></div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how">
+    <div class="section-label">Simple Process</div>
+    <h2 class="section-title reveal" style="max-width:500px;">From signup to pickup in 4 easy steps</h2>
+    <p class="section-sub reveal">No complicated setup. No confusing contracts. Just clean streets and real gifts.</p>
+    <div class="steps-grid">
+      <div class="step reveal"><div class="step-num">01</div><span class="step-icon">📱</span><div class="step-title">Sign Up</div><p class="step-desc">Create your account in under 2 minutes. Enter your area pincode and we'll confirm availability.</p><div class="step-connector"></div></div>
+      <div class="step reveal"><div class="step-num">02</div><span class="step-icon">📦</span><div class="step-title">Pick a Plan</div><p class="step-desc">Choose a package that fits your household size and waste volume. Add dry waste if needed.</p><div class="step-connector"></div></div>
+      <div class="step reveal"><div class="step-num">03</div><span class="step-icon">🚛</span><div class="step-title">We Collect</div><p class="step-desc">Our verified collectors arrive on time at your doorstep. You'll get a notification before arrival.</p><div class="step-connector"></div></div>
+      <div class="step reveal"><div class="step-num">04</div><span class="step-icon">🎁</span><div class="step-title">Earn & Redeem Gifts</div><p class="step-desc">Points added after every pickup. Redeem for Zomato, Swiggy, Amazon vouchers — instantly.</p></div>
+    </div>
+  </section>
+
+  <!-- PACKAGES -->
+  <section class="packages-section" id="packages">
+    <div class="section-label reveal">Pricing</div>
+    <h2 class="section-title reveal">Pick the plan that fits your home</h2>
+    <p class="section-sub reveal">All plans include doorstep pickup, real-time tracking, and gift point earning. No hidden charges.</p>
+    <div class="packages-grid">
+      <div class="package-card reveal">
+        <div class="pkg-period">15 Days</div>
+        <div class="pkg-price">₹299 <span>/ 15 days</span></div>
+        <p class="pkg-desc">Perfect for trying us out or smaller households.</p>
+        <ul class="pkg-features"><li>15 pickups over 15 days</li><li>Wet waste collection</li><li>50 pts per pickup</li><li>App tracking</li></ul>
+        <button class="pkg-btn" onclick="window.location.href='booking.html'">Get Started</button>
+      </div>
+      <div class="package-card featured reveal">
+        <div class="featured-badge">Most Popular</div>
+        <div class="pkg-period">Monthly</div>
+        <div class="pkg-price">₹499 <span>/ month</span></div>
+        <p class="pkg-desc">Best value for regular households. Save 20% vs bi-weekly.</p>
+        <ul class="pkg-features"><li>Daily pickups (30 days)</li><li>Wet + Dry waste</li><li>100 pts per pickup</li><li>Priority scheduling</li><li>Dashboard access</li></ul>
+        <button class="pkg-btn" onclick="window.location.href='booking.html'">Get Started</button>
+      </div>
+      <div class="package-card reveal">
+        <div class="pkg-period">Quarterly</div>
+        <div class="pkg-price">₹1199 <span>/ 3 months</span></div>
+        <p class="pkg-desc">For committed households that want the best deal year-round.</p>
+        <ul class="pkg-features"><li>90 days of daily pickups</li><li>Wet + Dry + Bulk waste</li><li>150 pts per pickup</li><li>Dedicated collector</li><li>Monthly impact report</li></ul>
+        <button class="pkg-btn" onclick="window.location.href='booking.html'">Get Started</button>
       </div>
     </div>
+  </section>
 
-    <!-- Swiggy -->
-    <div class="voucher-card reveal">
-      <div class="voucher-brand brand-swiggy">
-        <div class="brand-logo">🛵</div>
-        <div><div class="brand-name">Swiggy</div><div class="brand-tagline">Food, groceries & more</div></div>
-      </div>
-      <div class="voucher-body">
-        <div class="voucher-tiers">
-          <div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div>
+  <!-- REDEEM GIFTS -->
+  <section class="rewards-section" id="rewards">
+    <div class="section-label reveal">Redeem Gifts</div>
+    <h2 class="section-title reveal">Earn points. Redeem gift vouchers.</h2>
+    <p class="section-sub reveal">Every pickup puts gift points in your wallet. Stack them up and redeem for vouchers from your favourite brands.</p>
+
+    <div class="points-banner reveal">
+      <div class="points-left">
+        <div class="points-icon">🎁</div>
+        <div>
+          <div class="points-label">Your Gift Points Balance</div>
+          <div class="points-value">1,850 pts</div>
+          <div class="points-sub">Enough for a ₹100 voucher right now!</div>
         </div>
-        <button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button>
+      </div>
+      <div class="points-bar-wrap">
+        <div class="points-bar-label"><span>Progress to ₹200 voucher</span><span>1,850 / 2,000 pts</span></div>
+        <div class="points-bar-track"><div class="points-bar-fill" id="landingBar"></div></div>
+        <div class="points-next">🔥 Just 150 more points — that's 2 pickups away!</div>
       </div>
     </div>
 
-    <!-- Amazon -->
-    <div class="voucher-card reveal">
-      <div class="voucher-brand brand-amazon">
-        <div class="brand-logo">📦</div>
-        <div><div class="brand-name">Amazon</div><div class="brand-tagline">Shop anything, anytime</div></div>
-      </div>
-      <div class="voucher-body">
-        <div class="voucher-tiers">
-          <div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div>
-        </div>
-        <button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button>
-      </div>
+    <div class="earn-row reveal">
+      <div class="earn-chip">🗑️ Wet waste <strong>+50 pts</strong></div>
+      <div class="earn-chip">📦 Dry waste <strong>+80 pts</strong></div>
+      <div class="earn-chip">🌿 Bulk waste <strong>+120 pts</strong></div>
+      <div class="earn-chip">🔥 30-day streak <strong>+500 pts</strong></div>
+      <div class="earn-chip">👥 Refer a friend <strong>+200 pts</strong></div>
     </div>
 
-    <!-- Flipkart -->
-    <div class="voucher-card reveal">
-      <div class="voucher-brand brand-flipkart">
-        <div class="brand-logo">🛍️</div>
-        <div><div class="brand-name">Flipkart</div><div class="brand-tagline">Electronics, fashion & more</div></div>
-      </div>
-      <div class="voucher-body">
-        <div class="voucher-tiers">
-          <div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div>
-        </div>
-        <button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button>
-      </div>
+    <div class="vouchers-grid">
+      <div class="voucher-card reveal"><div class="voucher-brand brand-zomato"><div class="brand-logo">🍕</div><div><div class="brand-name">Zomato</div><div class="brand-tagline">Food delivery & dining</div></div></div><div class="voucher-body"><div class="voucher-tiers"><div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div></div><button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button></div></div>
+      <div class="voucher-card reveal"><div class="voucher-brand brand-swiggy"><div class="brand-logo">🛵</div><div><div class="brand-name">Swiggy</div><div class="brand-tagline">Food, groceries & more</div></div></div><div class="voucher-body"><div class="voucher-tiers"><div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div></div><button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button></div></div>
+      <div class="voucher-card reveal"><div class="voucher-brand brand-amazon"><div class="brand-logo">📦</div><div><div class="brand-name">Amazon</div><div class="brand-tagline">Shop anything, anytime</div></div></div><div class="voucher-body"><div class="voucher-tiers"><div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div></div><button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button></div></div>
+      <div class="voucher-card reveal"><div class="voucher-brand brand-flipkart"><div class="brand-logo">🛍️</div><div><div class="brand-name">Flipkart</div><div class="brand-tagline">Electronics & fashion</div></div></div><div class="voucher-body"><div class="voucher-tiers"><div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div></div><button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button></div></div>
+      <div class="voucher-card reveal"><div class="voucher-brand brand-bms"><div class="brand-logo">🎬</div><div><div class="brand-name">BookMyShow</div><div class="brand-tagline">Movies & events</div></div></div><div class="voucher-body"><div class="voucher-tiers"><div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div></div><button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button></div></div>
+      <div class="voucher-card reveal"><div class="voucher-brand brand-bigbasket"><div class="brand-logo">🥦</div><div><div class="brand-name">BigBasket</div><div class="brand-tagline">Fresh groceries delivered</div></div></div><div class="voucher-body"><div class="voucher-tiers"><div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div><div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div></div><button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button></div></div>
     </div>
+    <div class="rewards-note reveal">Voucher codes delivered instantly to your email. <a href="#" style="color:var(--gold);">Terms apply.</a></div>
+  </section>
 
-    <!-- BookMyShow -->
-    <div class="voucher-card reveal">
-      <div class="voucher-brand brand-bms">
-        <div class="brand-logo">🎬</div>
-        <div><div class="brand-name">BookMyShow</div><div class="brand-tagline">Movies, events & concerts</div></div>
-      </div>
-      <div class="voucher-body">
-        <div class="voucher-tiers">
-          <div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div>
-        </div>
-        <button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button>
-      </div>
+  <!-- CTA -->
+  <div class="cta-section reveal">
+    <h2 class="cta-title">Ready for cleaner streets?</h2>
+    <p class="cta-sub">Join thousands of households already making a difference — and earning real gift vouchers while doing it.</p>
+    <div class="cta-actions">
+      <a href="booking.html" class="btn-light">Book My First Pickup</a>
+      <a href="calculator.html" class="btn-outline-light">Calculate My Waste</a>
     </div>
-
-    <!-- BigBasket -->
-    <div class="voucher-card reveal">
-      <div class="voucher-brand brand-bigbasket">
-        <div class="brand-logo">🥦</div>
-        <div><div class="brand-name">BigBasket</div><div class="brand-tagline">Fresh groceries delivered</div></div>
-      </div>
-      <div class="voucher-body">
-        <div class="voucher-tiers">
-          <div class="voucher-tier"><span class="tier-amount">₹50 voucher</span><span class="tier-points">500 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹100 voucher</span><span class="tier-points">1,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹200 voucher</span><span class="tier-points">2,000 pts</span></div>
-          <div class="voucher-tier"><span class="tier-amount">₹500 voucher</span><span class="tier-points">5,000 pts</span></div>
-        </div>
-        <button class="redeem-btn" onclick="window.location.href='dashboard.html'">Redeem Now →</button>
-      </div>
-    </div>
-
   </div>
 
-  <div class="rewards-note reveal">
-    Voucher codes are delivered instantly to your registered email & app. <a href="#">Terms apply.</a>
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="logo" onclick="showLanding()">DumpIt <span style="color:var(--green-bright)">Bae</span></a>
+    <ul class="footer-links">
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+      <li><a href="#">Contact</a></li>
+      <li><a href="dashboard.html">My Dashboard</a></li>
+    </ul>
+    <div class="footer-copy">© 2025 DumpIt Bae. Clean streets, real gifts.</div>
+  </footer>
+
+</div><!-- /landing -->
+
+
+<!-- ══════════════════════════════════════
+     DASHBOARD (toggled via nav button)
+══════════════════════════════════════ -->
+<div id="dashboard">
+
+  <!-- Top greeting bar -->
+  <div class="dash-topbar">
+    <div>
+      <div class="dash-greeting">Good morning, <em>Rahul</em> 🌿</div>
+      <div class="dash-date" id="dashDate"></div>
+    </div>
+    <a href="booking.html" style="background:var(--green-deep);color:var(--cream);padding:0.55rem 1.3rem;border-radius:100px;font-size:0.82rem;font-weight:600;text-decoration:none;">+ Book Pickup</a>
   </div>
 
-</section>
-
-<!-- CTA -->
-<div class="cta-section reveal">
-  <h2 class="cta-title">Ready for cleaner streets?</h2>
-  <p class="cta-sub">Join thousands of households already making a difference — and earning real vouchers while doing it.</p>
-  <div class="cta-actions">
-    <a href="booking.html" class="btn-light">Book My First Pickup</a>
-    <a href="calculator.html" class="btn-outline-light">Calculate My Waste</a>
+  <!-- Stat cards -->
+  <div class="dash-stats">
+    <div class="dstat-card s-green"><div class="dsc-icon">🎁</div><div class="dsc-label">Gift Points</div><div class="dsc-val" id="ds1">1,850</div><div class="dsc-sub">Enough for ₹100 voucher</div><div class="dsc-badge">↑ +310 this month</div></div>
+    <div class="dstat-card s-gold"><div class="dsc-icon">🌱</div><div class="dsc-label">CO₂ Saved</div><div class="dsc-val" id="ds2">47.2</div><div class="dsc-sub">kg this month</div><div class="dsc-badge">↑ +8.4 kg vs last month</div></div>
+    <div class="dstat-card s-soil"><div class="dsc-icon">🗑️</div><div class="dsc-label">Waste Collected</div><div class="dsc-val" id="ds3">138</div><div class="dsc-sub">kg total · 18 pickups</div><div class="dsc-badge">↑ Since Jan 2025</div></div>
+    <div class="dstat-card s-blue"><div class="dsc-icon">🏆</div><div class="dsc-label">Neighbourhood Rank</div><div class="dsc-val">#4</div><div class="dsc-sub">Top 10% in your area</div><div class="dsc-badge">↑ Up 2 spots</div></div>
   </div>
-</div>
 
-<!-- FOOTER -->
-<footer>
-  <a href="index.html" class="logo">Dump<span style="color:var(--green-bright)">It</span></a>
-  <ul class="footer-links">
-    <li><a href="#">Privacy</a></li>
-    <li><a href="#">Terms</a></li>
-    <li><a href="#">Contact</a></li>
-    <li><a href="dashboard.html">Dashboard</a></li>
-  </ul>
-  <div class="footer-copy">© 2025 DumpIt. Clean streets, real rewards.</div>
-</footer>
+  <div class="dash-grid">
+
+    <!-- LEFT COLUMN -->
+    <div>
+
+      <!-- Waste stats chart -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <div class="dash-card-title">Waste Over Time</div>
+          <div class="chart-tabs">
+            <button class="chart-tab active" onclick="switchTab(this,'weekly')">Weekly</button>
+            <button class="chart-tab" onclick="switchTab(this,'monthly')">Monthly</button>
+          </div>
+        </div>
+        <div class="chart-area">
+          <svg class="chart-svg" viewBox="0 0 600 180" preserveAspectRatio="none" id="chartSvg">
+            <defs><linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4a8c5c" stop-opacity="0.2"/><stop offset="100%" stop-color="#4a8c5c" stop-opacity="0"/></linearGradient></defs>
+            <line x1="0" y1="36" x2="600" y2="36" class="chart-grid-line"/>
+            <line x1="0" y1="72" x2="600" y2="72" class="chart-grid-line"/>
+            <line x1="0" y1="108" x2="600" y2="108" class="chart-grid-line"/>
+            <line x1="0" y1="144" x2="600" y2="144" class="chart-grid-line"/>
+            <path id="chartAreaPath" class="chart-area-fill"/>
+            <path id="chartLinePath" class="chart-line"/>
+            <g id="chartDots"></g>
+          </svg>
+        </div>
+        <div class="chart-labels" id="chartLabels"></div>
+      </div>
+
+      <!-- Pickup history -->
+      <div class="dash-card">
+        <div class="dash-card-header"><div class="dash-card-title">Recent Pickups</div><a href="#" class="dash-card-action">View all →</a></div>
+        <div class="history-list">
+          <div class="history-item"><div class="hi-date">Feb 20</div><div class="hi-icon">🍛</div><div class="hi-info"><div class="hi-type">Wet + Dry Waste</div><div class="hi-weight">1.2 kg collected</div></div><div class="hi-status done">Done</div><div class="hi-pts">+80 pts</div></div>
+          <div class="history-item"><div class="hi-date">Feb 19</div><div class="hi-icon">🍛</div><div class="hi-info"><div class="hi-type">Wet Waste</div><div class="hi-weight">0.8 kg collected</div></div><div class="hi-status done">Done</div><div class="hi-pts">+50 pts</div></div>
+          <div class="history-item"><div class="hi-date">Feb 18</div><div class="hi-icon">📦</div><div class="hi-info"><div class="hi-type">Dry Waste Special</div><div class="hi-weight">2.1 kg recycled</div></div><div class="hi-status done">Done</div><div class="hi-pts">+80 pts</div></div>
+          <div class="history-item"><div class="hi-date">Feb 17</div><div class="hi-icon">🍛</div><div class="hi-info"><div class="hi-type">Wet Waste</div><div class="hi-weight">0.6 kg</div></div><div class="hi-status missed">Missed</div><div class="hi-pts" style="color:var(--green-pale)">—</div></div>
+          <div class="history-item"><div class="hi-date">Feb 16</div><div class="hi-icon">🍛</div><div class="hi-info"><div class="hi-type">Wet + Dry Waste</div><div class="hi-weight">1.5 kg collected</div></div><div class="hi-status done">Done</div><div class="hi-pts">+80 pts</div></div>
+        </div>
+      </div>
+
+      <!-- Streak -->
+      <div class="dash-card">
+        <div class="dash-card-header"><div class="dash-card-title">🔥 This Month's Streak</div><span style="font-size:0.78rem;color:var(--green-mid);">18 / 30 days</span></div>
+        <div class="streak-dots" id="streakDots"></div>
+        <div style="font-size:0.8rem;color:var(--green-mid);">🎯 12 more days to unlock the <strong style="color:var(--gold)">30-day streak bonus (+500 pts)</strong>!</div>
+      </div>
+
+      <!-- Redeem gifts in dashboard -->
+      <div class="dash-card">
+        <div class="dash-card-header"><div class="dash-card-title">Redeem Gift Vouchers</div><span style="font-size:0.78rem;color:var(--green-mid);">Balance: <strong style="color:var(--gold)">1,850 pts</strong></span></div>
+        <div class="dash-redeem-grid">
+          <div class="dash-redeem-card"><div class="drc-icon">🍕</div><div class="drc-name">Zomato ₹100</div><div class="drc-pts">1,000 pts</div></div>
+          <div class="dash-redeem-card"><div class="drc-icon">🛵</div><div class="drc-name">Swiggy ₹100</div><div class="drc-pts">1,000 pts</div></div>
+          <div class="dash-redeem-card"><div class="drc-icon">📦</div><div class="drc-name">Amazon ₹50</div><div class="drc-pts">500 pts</div></div>
+          <div class="dash-redeem-card"><div class="drc-icon">🛍️</div><div class="drc-name">Flipkart ₹50</div><div class="drc-pts">500 pts</div></div>
+          <div class="dash-redeem-card"><div class="drc-icon">🎬</div><div class="drc-name">BookMyShow ₹100</div><div class="drc-pts">1,000 pts</div></div>
+          <div class="dash-redeem-card"><div class="drc-icon">🥦</div><div class="drc-name">BigBasket ₹200</div><div class="drc-pts">2,000 pts</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+
+      <!-- Gift points balance -->
+      <div class="gift-balance-card">
+        <div class="gb-label">🎁 Gift Points Balance</div>
+        <div class="gb-val">1,850</div>
+        <div class="gb-sub">Redeem for vouchers from 6 brands</div>
+        <div class="gb-bar-label"><span>To next ₹200 voucher</span><span>1,850 / 2,000</span></div>
+        <div class="gb-bar-track"><div class="gb-bar-fill" id="dashBar"></div></div>
+        <div class="gb-next">🎯 Just 150 more pts — 2 pickups away!</div>
+      </div>
+
+      <!-- Upcoming pickups -->
+      <div class="dash-card">
+        <div class="dash-card-header"><div class="dash-card-title">Upcoming Pickups</div><a href="booking.html" class="dash-card-action">Manage →</a></div>
+        <div class="upcoming-list">
+          <div class="upcoming-item next"><div class="ui-date"><div class="ui-date-month">FEB</div><div class="ui-date-num">21</div></div><div class="ui-info"><div class="ui-type">Wet + Dry Waste</div><div class="ui-time">🕖 7:00 AM – 9:00 AM</div></div><span style="font-size:1.2rem;">🚛</span></div>
+          <div class="upcoming-item"><div class="ui-date"><div class="ui-date-month">FEB</div><div class="ui-date-num">22</div></div><div class="ui-info"><div class="ui-type">Wet Waste</div><div class="ui-time">🕖 7:00 AM – 9:00 AM</div></div><span style="font-size:1.2rem;">🗑️</span></div>
+          <div class="upcoming-item"><div class="ui-date"><div class="ui-date-month">FEB</div><div class="ui-date-num">23</div></div><div class="ui-info"><div class="ui-type">Wet Waste</div><div class="ui-time">🕖 7:00 AM – 9:00 AM</div></div><span style="font-size:1.2rem;">🗑️</span></div>
+          <div class="upcoming-item"><div class="ui-date"><div class="ui-date-month">FEB</div><div class="ui-date-num">25</div></div><div class="ui-info"><div class="ui-type">Bulk Waste Collection</div><div class="ui-time">🕙 10:00 AM – 12:00 PM</div></div><span style="font-size:1.2rem;">🌿</span></div>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="dash-card">
+        <div class="dash-card-header"><div class="dash-card-title">🏆 Neighbourhood Rank</div><span style="font-size:0.75rem;color:var(--green-mid);">Koramangala</span></div>
+        <div class="lb-list">
+          <div class="lb-item"><div class="lb-rank gold">1</div><div class="lb-avatar" style="background:linear-gradient(135deg,#c9a84c,#f0d07a);">P</div><div class="lb-name">Priya M.</div><div class="lb-pts">4,210 pts</div></div>
+          <div class="lb-item"><div class="lb-rank silver">2</div><div class="lb-avatar" style="background:linear-gradient(135deg,#8a9ba8,#b0c4d0);">A</div><div class="lb-name">Arun K.</div><div class="lb-pts">3,890 pts</div></div>
+          <div class="lb-item"><div class="lb-rank bronze">3</div><div class="lb-avatar" style="background:linear-gradient(135deg,#a0673a,#c9956a);">S</div><div class="lb-name">Sunita R.</div><div class="lb-pts">3,540 pts</div></div>
+          <div class="lb-item you"><div class="lb-rank" style="color:var(--green-bright);font-weight:800;">4</div><div class="lb-avatar" style="background:linear-gradient(135deg,#4a8c5c,#7ab88a);">R</div><div class="lb-name">You <span class="lb-you-tag">YOU</span></div><div class="lb-pts">1,850 pts</div></div>
+          <div class="lb-item"><div class="lb-rank">5</div><div class="lb-avatar" style="background:linear-gradient(135deg,#3d5a8b,#6b8bc9);">V</div><div class="lb-name">Vikram S.</div><div class="lb-pts">1,610 pts</div></div>
+          <div class="lb-item"><div class="lb-rank">6</div><div class="lb-avatar" style="background:linear-gradient(135deg,#6b4226,#a0673a);">M</div><div class="lb-name">Meera P.</div><div class="lb-pts">1,380 pts</div></div>
+        </div>
+        <div style="margin-top:1rem;padding:0.8rem;background:rgba(74,140,92,0.06);border-radius:12px;font-size:0.78rem;color:var(--green-mid);text-align:center;">💪 Collect <strong style="color:var(--green-bright)">1,690 more points</strong> to reach #3!</div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /dashboard -->
 
 <script>
-  // Cursor
+  // ── Cursor ──
   const cursor=document.getElementById('cursor');
-  const cursorRing=document.getElementById('cursorRing');
+  const ring=document.getElementById('cursorRing');
   let mx=0,my=0,rx=0,ry=0;
   document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
-  (function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;cursorRing.style.left=rx+'px';cursorRing.style.top=ry+'px';requestAnimationFrame(animRing);})();
-  document.querySelectorAll('a,button,.feature-card,.package-card,.voucher-card,.voucher-tier').forEach(el=>{
-    el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(1.8)';cursorRing.style.transform='translate(-50%,-50%) scale(1.5)';cursorRing.style.opacity='0.3';});
-    el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';cursorRing.style.transform='translate(-50%,-50%) scale(1)';cursorRing.style.opacity='0.6';});
+  (function loop(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+  document.querySelectorAll('a,button,.feature-card,.package-card,.voucher-card,.voucher-tier,.dstat-card,.history-item,.upcoming-item,.lb-item,.dash-redeem-card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(1.8)';ring.style.transform='translate(-50%,-50%) scale(1.5)';ring.style.opacity='0.3';});
+    el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='0.6';});
   });
 
-  // Scroll reveal
-  const observer=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),80);observer.unobserve(e.target);}});
-  },{threshold:0.1});
-  document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-
-  // Animate points bar on scroll
-  const barObs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{if(e.isIntersecting){document.getElementById('pointsBar').style.width='92.5%';barObs.disconnect();}});
-  },{threshold:0.5});
-  const bar=document.querySelector('.points-bar-track');
-  if(bar)barObs.observe(bar);
-
-  // Stat counters
-  function animateCount(el,target,suffix=''){
-    let start=0;
-    const step=ts=>{if(!start)start=ts;const p=Math.min((ts-start)/1800,1);el.textContent=Math.floor(p*target)+suffix;if(p<1)requestAnimationFrame(step);};
-    requestAnimationFrame(step);
+  // ── Dashboard toggle ──
+  let dashOpen = false;
+  function toggleDashboard() {
+    dashOpen = !dashOpen;
+    document.getElementById('landing').style.display = dashOpen ? 'none' : 'block';
+    const dash = document.getElementById('dashboard');
+    dash.style.display = dashOpen ? 'block' : 'none';
+    if (dashOpen) {
+      dash.classList.add('visible');
+      window.scrollTo({top:0,behavior:'smooth'});
+      initDashboard();
+    }
+    const btn = document.getElementById('dashBtn');
+    btn.classList.toggle('active', dashOpen);
+    btn.innerHTML = dashOpen
+      ? '<span class="dot"></span> Back to Home'
+      : '<span class="dot"></span> My Dashboard';
   }
-  const statsObs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{if(e.isIntersecting){animateCount(document.getElementById('stat1'),12,'K+');animateCount(document.getElementById('stat2'),340,'T');animateCount(document.getElementById('stat3'),98,'%');statsObs.disconnect();}});
-  },{threshold:0.5});
-  if(document.querySelector('.hero-stats'))statsObs.observe(document.querySelector('.hero-stats'));
+  function showLanding() {
+    if (dashOpen) toggleDashboard();
+  }
+
+  // ── Dashboard init ──
+  function initDashboard() {
+    // Date
+    document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+    // Bars
+    setTimeout(()=>{
+      const db = document.getElementById('dashBar');
+      if(db) db.style.width='92.5%';
+    }, 300);
+    // Streak dots
+    const el = document.getElementById('streakDots');
+    if (el && !el.children.length) {
+      for(let d=1;d<=28;d++){
+        const div=document.createElement('div');
+        div.className='streak-dot';
+        div.textContent=d;
+        if(d===21) div.classList.add('today');
+        else if(d<21) div.classList.add(d===17?'missed':'done');
+        else div.classList.add('upcoming');
+        el.appendChild(div);
+      }
+    }
+    renderChart('weekly');
+  }
+
+  // ── Chart ──
+  const chartData = {
+    weekly:  { labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], values:[1.2,0.8,1.5,1.1,0.9,1.8,1.3] },
+    monthly: { labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'], values:[28,32,25,38,31,42,36,44] }
+  };
+  function renderChart(type) {
+    const {labels,values}=chartData[type];
+    const min=Math.min(...values)*0.8, max=Math.max(...values)*1.1;
+    const W=600,H=160,pad=20;
+    const xStep=(W-pad*2)/(values.length-1);
+    const pts=values.map((v,i)=>({x:pad+i*xStep,y:H-pad-((v-min)/(max-min))*(H-pad*2)}));
+    const lp=pts.map((p,i)=>(i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`)).join(' ');
+    document.getElementById('chartLinePath').setAttribute('d',lp);
+    document.getElementById('chartAreaPath').setAttribute('d',lp+` L${pts[pts.length-1].x},${H} L${pts[0].x},${H} Z`);
+    const dg=document.getElementById('chartDots'); dg.innerHTML='';
+    pts.forEach(p=>{const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',4);c.setAttribute('class','chart-dot');dg.appendChild(c);});
+    document.getElementById('chartLabels').innerHTML=labels.map(l=>`<span class="chart-label">${l}</span>`).join('');
+  }
+  function switchTab(el,type){document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderChart(type);}
+
+  // ── Scroll reveal ──
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),80);obs.unobserve(e.target);}});},{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+  // ── Landing points bar ──
+  const barObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const b=document.getElementById('landingBar');if(b)b.style.width='92.5%';barObs.disconnect();}});},{threshold:0.5});
+  const bt=document.querySelector('.points-bar-track');
+  if(bt)barObs.observe(bt);
+
+  // ── Stat counters ──
+  function animCount(el,target,suffix=''){if(!el)return;let s=0;const step=ts=>{if(!s)s=ts;const p=Math.min((ts-s)/1800,1);el.textContent=Math.floor(p*target)+suffix;if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);}
+  const sObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){animCount(document.getElementById('stat1'),12,'K+');animCount(document.getElementById('stat2'),340,'T');animCount(document.getElementById('stat3'),98,'%');sObs.disconnect();}});},{threshold:0.5});
+  if(document.querySelector('.hero-stats'))sObs.observe(document.querySelector('.hero-stats'));
 </script>
 </body>
 </html>

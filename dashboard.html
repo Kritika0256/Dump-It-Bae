@@ -362,7 +362,7 @@
     <a href="calculator.html" class="nav-item"><span class="nav-icon">🧮</span> Waste Calculator</a>
 
     <div class="nav-section-label">Rewards</div>
-    <a href="#redeem" class="nav-item"><span class="nav-icon">🪙</span> Carbon Tokens</a>
+    <a href="#redeem" class="nav-item"><span class="nav-icon">🪙</span> Gift Points</a>
     <a href="#leaderboard" class="nav-item"><span class="nav-icon">🏆</span> Leaderboard</a>
 
     <div class="nav-section-label">Account</div>
@@ -406,9 +406,9 @@
     <div class="stats-row">
       <div class="stat-card s-green">
         <div class="sc-icon">🪙</div>
-        <div class="sc-label">Carbon Credits</div>
+        <div class="sc-label">Gift Points</div>
         <div class="sc-val">2,840</div>
-        <div class="sc-sub">≈ 28 carbon tokens</div>
+        <div class="sc-sub">≈ 28 gift points</div>
         <div class="sc-change up">↑ +310 this month</div>
       </div>
       <div class="stat-card s-gold">
@@ -534,34 +534,34 @@
         <!-- REDEEM SECTION -->
         <div class="section-card" id="redeem">
           <div class="sc-header">
-            <div class="sc-title">Redeem Carbon Tokens</div>
-            <span style="font-size:0.78rem;color:var(--green-mid);">Balance: <strong style="color:var(--gold)">28 tokens</strong></span>
+            <div class="sc-title">Redeem Gift Points</div>
+            <span style="font-size:0.78rem;color:var(--green-mid);">Balance: <strong style="color:var(--gold)">28 pts</strong></span>
           </div>
           <div class="redeem-grid">
             <div class="redeem-card">
               <div class="rc-icon">🛒</div>
               <div class="rc-name">₹50 Grocery Voucher</div>
               <div class="rc-desc">Redeemable at BigBasket, Zepto & more</div>
-              <div class="rc-cost"><div class="rc-pts">5 tokens</div><button class="rc-btn" onclick="redeem(this, 5)">Redeem</button></div>
+              <div class="rc-cost"><div class="rc-pts">500 pts</div><button class="rc-btn" onclick="redeem(this, 5)">Redeem</button></div>
             </div>
             <div class="redeem-card">
               <div class="rc-icon">🌱</div>
               <div class="rc-name">Plant a Tree</div>
               <div class="rc-desc">We'll plant a tree in your name with GreenKraft</div>
-              <div class="rc-cost"><div class="rc-pts">10 tokens</div><button class="rc-btn" onclick="redeem(this, 10)">Redeem</button></div>
+              <div class="rc-cost"><div class="rc-pts">1,000 pts</div><button class="rc-btn" onclick="redeem(this, 10)">Redeem</button></div>
             </div>
             <div class="redeem-card">
               <div class="rc-icon">♻️</div>
               <div class="rc-name">Free Pickup Month</div>
               <div class="rc-desc">Get one month of free pickups added to your plan</div>
-              <div class="rc-cost"><div class="rc-pts">25 tokens</div><button class="rc-btn" onclick="redeem(this, 25)">Redeem</button></div>
+              <div class="rc-cost"><div class="rc-pts">2500 pts</div><button class="rc-btn" onclick="redeem(this, 25)">Redeem</button></div>
             </div>
             <div class="redeem-card locked">
               <div class="rc-lock">🔒</div>
               <div class="rc-icon">⚡</div>
               <div class="rc-name">EV Charging Credit</div>
               <div class="rc-desc">₹200 credit for EV charging stations</div>
-              <div class="rc-cost"><div class="rc-pts">50 tokens</div><button class="rc-btn disabled">Locked</button></div>
+              <div class="rc-cost"><div class="rc-pts">5,000 pts</div><button class="rc-btn disabled">Locked</button></div>
             </div>
           </div>
         </div>
@@ -573,12 +573,12 @@
 
         <!-- TOKEN BALANCE -->
         <div class="token-balance-card">
-          <div class="tb-label">🪙 Carbon Token Balance</div>
+          <div class="tb-label">🪙 Gift Points Balance</div>
           <div class="tb-val" id="tokenBal">28</div>
-          <div class="tb-sub">2,840 credits · 100 credits = 1 token</div>
+          <div class="tb-sub">2,840 points earned total</div>
           <div class="tb-bar-label">
-            <span>Progress to next token</span>
-            <span id="tokenProgress">68 / 100 credits</span>
+            <span>Points progress</span>
+            <span id="tokenProgress">680 / 1,000 pts</span>
           </div>
           <div class="tb-bar-track"><div class="tb-bar-fill" id="tokenBar"></div></div>
           <div class="tb-next">🎯 32 more credits to earn your next token</div>
