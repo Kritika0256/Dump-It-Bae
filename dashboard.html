@@ -348,9 +348,9 @@
 <aside class="sidebar">
   <div class="sidebar-logo">Dump<span>It</span></div>
   <div class="sidebar-user">
-    <div class="user-avatar">RS</div>
+    <div class="user-avatar" id="userAvatar">?</div>
     <div>
-      <div class="user-name">Rahul Sharma</div>
+      <div class="user-name" id="userName">Loading...</div>
       <div class="user-plan">🌿 Monthly Plan · Active</div>
     </div>
   </div>
@@ -368,6 +368,7 @@
     <div class="nav-section-label">Account</div>
     <a href="#" class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
     <a href="index.html" class="nav-item"><span class="nav-icon">←</span> Home</a>
+    <a href="#" class="nav-item" onclick="logout()" style="color:#c0392b;"><span class="nav-icon">🚪</span> Logout</a>
   </nav>
 
   <div class="streak-banner">
@@ -669,6 +670,84 @@
 </div>
 
 <script>
+  const API = 'http://localhost:5000/api';
+
+  // ── LOAD REAL USER DATA ───────────────────────────────────
+  async function loadUserData() {
+    const token = localStorage.getItem('dumpit_token');
+    const userRaw = localStorage.getItem('dumpit_user');
+
+    // If not logged in, redirect to auth
+    if (!token || !userRaw) {
+      window.location.href = '/auth.html';
+      return;
+    }
+
+    const user = JSON.parse(userRaw);
+
+    // Set name everywhere
+    const firstName = user.name ? user.name.split(' ')[0] : 'Friend';
+    document.querySelectorAll('.user-name').forEach(el => el.textContent = user.name || 'User');
+
+    // Set avatar initials
+    const avatarEl = document.getElementById('userAvatar');
+    if (avatarEl && user.name) {
+      const parts = user.name.trim().split(' ');
+      avatarEl.textContent = parts.length >= 2
+        ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+        : parts[0].substring(0,2).toUpperCase();
+    }
+
+    // Greeting with time of day
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const greetEl = document.querySelector('.greeting-text');
+    if (greetEl) greetEl.innerHTML = `${greet}, <em>${firstName}</em> 🌿`;
+
+    // Update gift points balance
+    const points = user.gift_points || 0;
+    const tokenBalEl = document.getElementById('tokenBal');
+    if (tokenBalEl) tokenBalEl.textContent = points;
+    tokenBalance = points;
+
+    // Fetch fresh stats from API
+    try {
+      const res = await fetch(`${API}/pickups/stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const stats = await res.json();
+        // Update stat cards with real data
+        const scVals = document.querySelectorAll('.sc-val');
+        if (scVals[0]) animCount(scVals[0], stats.gift_points || points, 0);
+        if (scVals[1]) animCount(scVals[1], stats.co2_saved || 0, 1);
+        if (scVals[2]) scVals[2].textContent = `${stats.total_waste_kg || 0}`;
+        if (scVals[3]) scVals[3].textContent = `#${stats.rank || '--'}`;
+
+        // Update streak
+        const streakNum = document.querySelector('.streak-num');
+        if (streakNum) streakNum.textContent = stats.streak_days || 0;
+
+        // Update greeting sub
+        const greetSub = document.querySelector('.greeting-sub');
+        if (greetSub) greetSub.textContent = `You have ${stats.gift_points || 0} gift points · ${stats.streak_days || 0}-day streak · ${stats.total_pickups || 0} pickups completed`;
+
+        // Update token balance
+        if (tokenBalEl) tokenBalEl.textContent = stats.gift_points || points;
+        tokenBalance = stats.gift_points || points;
+      }
+    } catch(e) {
+      console.log('Stats not available yet, showing local data');
+    }
+  }
+
+  // Logout function
+  function logout() {
+    localStorage.removeItem('dumpit_token');
+    localStorage.removeItem('dumpit_user');
+    window.location.href = '/auth.html';
+  }
+
   // Cursor
   const cursor = document.getElementById('cursor');
   const ring = document.getElementById('cursorRing');
@@ -793,6 +872,9 @@
     });
   }, { threshold: 0.3 });
   observer.observe(document.querySelector('.stats-row'));
+
+  // Load real user data on page load
+  loadUserData();
 </script>
 
 </body>
