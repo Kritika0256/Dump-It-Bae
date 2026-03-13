@@ -754,49 +754,111 @@
     return s.val * mult * householdMult;
   }
 
-  function calculate() {
-    const wetKg = getDailyKg('wet');
-    const dryKg = getDailyKg('dry');
-    const bulkKg = getDailyKg('bulk');
-    const ewasteKgDay = state.ewaste.val * householdMult / 30;
+  // ── C++ ENGINE BADGE ─────────────────────
+  function showEngineBadge(engine) {
+    let badge = document.getElementById('engineBadge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.id = 'engineBadge';
+      badge.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;background:rgba(26,58,42,0.95);border:1px solid rgba(74,140,92,0.4);border-radius:100px;padding:0.5rem 1.2rem;font-size:0.75rem;font-weight:700;color:#7ab88a;z-index:999;letter-spacing:0.05em;transition:all 0.3s;';
+      document.body.appendChild(badge);
+    }
+    if (engine === 'C++') {
+      badge.innerHTML = '⚡ Powered by C++ Engine';
+      badge.style.borderColor = 'rgba(201,168,76,0.5)';
+      badge.style.color = '#f0d07a';
+    } else {
+      badge.innerHTML = '🟡 JS Fallback Mode';
+      badge.style.borderColor = 'rgba(74,140,92,0.4)';
+      badge.style.color = '#7ab88a';
+    }
+  }
 
-    const totalDaily = wetKg + dryKg + bulkKg + ewasteKgDay;
-    const totalMonthly = totalDaily * 30;
+  // ── UPDATE DOM WITH RESULTS ───────────────
+  function updateDOM(data) {
+    animateVal('co2Val', parseFloat(data.co2_saved || data.co2 || 0).toFixed(1));
+    animateVal('creditsVal', Math.round(data.credits_earned || data.credits || 0));
+    document.getElementById('totalWaste').textContent = parseFloat(data.total_waste_kg || data.totalDaily || 0).toFixed(2);
+    document.getElementById('totalMonthly').textContent = parseFloat(data.monthly_waste_kg || data.totalMonthly || 0).toFixed(1);
 
-    // CO2 saved
-    const co2 = (wetKg * co2Map.wet + dryKg * co2Map.dry + bulkKg * co2Map.bulk + ewasteKgDay * co2Map.ewaste) * 30;
-
-    // Credits
-    const credits = Math.round(
-      (wetKg * creditMap.wet + dryKg * creditMap.dry + bulkKg * creditMap.bulk + ewasteKgDay * creditMap.ewaste) * 30
-    );
-
-    // Breakdown percentages
-    const parts = [wetKg, dryKg, bulkKg, ewasteKgDay];
+    // Breakdown
+    const wetKg   = getDailyKg('wet');
+    const dryKg   = getDailyKg('dry');
+    const bulkKg  = getDailyKg('bulk');
+    const ewasteKg = state.ewaste.val * householdMult / 30;
+    const parts = [wetKg, dryKg, bulkKg, ewasteKg];
     const total = parts.reduce((a,b)=>a+b,0) || 1;
     const pcts = parts.map(p => Math.round((p/total)*100));
-
-    // Fix rounding
     const sum = pcts.reduce((a,b)=>a+b,0);
     pcts[0] += 100 - sum;
 
-    // Update DOM with animation
-    animateVal('co2Val', co2.toFixed(1));
-    animateVal('creditsVal', credits);
-    document.getElementById('totalWaste').textContent = totalDaily.toFixed(2);
-    document.getElementById('totalMonthly').textContent = totalMonthly.toFixed(1);
-
-    // Breakdown
     ['wet','dry','bulk','ewaste'].forEach((t,i)=>{
-      document.getElementById('bar'+t.charAt(0).toUpperCase()+t.slice(1)).style.width = pcts[i]+'%';
-      document.getElementById('pct'+t.charAt(0).toUpperCase()+t.slice(1)).textContent = pcts[i]+'%';
+      const key = t.charAt(0).toUpperCase()+t.slice(1);
+      document.getElementById('bar'+key).style.width = pcts[i]+'%';
+      document.getElementById('pct'+key).textContent = pcts[i]+'%';
     });
 
-    // Package recommendation
+    const totalDaily = parts.reduce((a,b)=>a+b,0);
     recommendPackage(totalDaily, dryKg > 0, state.ewaste.val > 0);
+    updateCosts(totalDaily, dryKg > 0, state.ewaste.val > 0, Math.round(data.credits_earned || data.credits || 0));
+  }
 
-    // Cost estimate
-    updateCosts(totalDaily, dryKg > 0, state.ewaste.val > 0, credits);
+  // ── CALCULATE — C++ API FIRST ─────────────
+  let calcTimeout = null;
+  function calculate() {
+    // Debounce — wait 300ms after slider stops
+    clearTimeout(calcTimeout);
+    calcTimeout = setTimeout(doCalculate, 300);
+  }
+
+  async function doCalculate() {
+    const wetKg   = getDailyKg('wet');
+    const dryKg   = getDailyKg('dry');
+    const bulkKg  = getDailyKg('bulk');
+    const ewasteKg = state.ewaste.val * householdMult / 30;
+    const freq = state.wet.freq || 'daily';
+
+    // Try C++ API first
+    try {
+      const res = await fetch('http://localhost:5000/api/calculator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wet_kg:   parseFloat(wetKg.toFixed(3)),
+          dry_kg:   parseFloat(dryKg.toFixed(3)),
+          bulk_kg:  parseFloat(bulkKg.toFixed(3)),
+          ewaste_kg: parseFloat(ewasteKg.toFixed(3)),
+          household_size: Math.round(householdMult * 2) || 1,
+          frequency: freq
+        })
+      });
+
+      if (res.ok) {
+        const raw = await res.json();
+        // Normalize field names — C++ & JS fallback use different keys
+        const data = {
+          co2_saved:       raw.co2_saved_monthly  || raw.co2_saved       || 0,
+          credits_earned:  raw.monthly_gift_points || raw.credits_earned  || 0,
+          total_waste_kg:  raw.total_daily_kg      || raw.total_waste_kg  || 0,
+          monthly_waste_kg:(raw.total_daily_kg||0) * 30,
+          engine:          raw.engine || 'C++'
+        };
+        updateDOM(data);
+        showEngineBadge(data.engine);
+        return;
+      }
+    } catch(e) {
+      // API not reachable — fall through to JS
+    }
+
+    // JS Fallback
+    const totalDaily   = wetKg + dryKg + bulkKg + ewasteKg;
+    const totalMonthly = totalDaily * 30;
+    const co2 = (wetKg*co2Map.wet + dryKg*co2Map.dry + bulkKg*co2Map.bulk + ewasteKg*co2Map.ewaste) * 30;
+    const credits = Math.round((wetKg*creditMap.wet + dryKg*creditMap.dry + bulkKg*creditMap.bulk + ewasteKg*creditMap.ewaste) * 30);
+
+    updateDOM({ co2_saved: co2, credits_earned: credits, total_waste_kg: totalDaily, monthly_waste_kg: totalMonthly });
+    showEngineBadge('JS');
   }
 
   function recommendPackage(dailyKg, hasDry, hasEwaste) {
@@ -859,11 +921,11 @@
       b.classList.toggle('active', isFirst);
     });
 
-    calculate();
+    doCalculate();
   }
 
   // Init
-  calculate();
+  doCalculate();
 </script>
 
 </body>

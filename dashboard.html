@@ -362,11 +362,11 @@
     <a href="calculator.html" class="nav-item"><span class="nav-icon">🧮</span> Waste Calculator</a>
 
     <div class="nav-section-label">Rewards</div>
-    <a href="#redeem" class="nav-item"><span class="nav-icon">🪙</span> Gift Points</a>
+    <a href="giftpoints.html" class="nav-item"><span class="nav-icon">🪙</span> Gift Points</a>
     <a href="#leaderboard" class="nav-item"><span class="nav-icon">🏆</span> Leaderboard</a>
 
     <div class="nav-section-label">Account</div>
-    <a href="#" class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+    <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
     <a href="index.html" class="nav-item"><span class="nav-icon">←</span> Home</a>
     <a href="#" class="nav-item" onclick="logout()" style="color:#c0392b;"><span class="nav-icon">🚪</span> Logout</a>
   </nav>
@@ -536,26 +536,26 @@
         <div class="section-card" id="redeem">
           <div class="sc-header">
             <div class="sc-title">Redeem Gift Points</div>
-            <span style="font-size:0.78rem;color:var(--green-mid);">Balance: <strong style="color:var(--gold)">28 pts</strong></span>
+            <span style="font-size:0.78rem;color:var(--green-mid);">Balance: <strong style="color:var(--gold)" id="redeemBalance">0 pts</strong></span>
           </div>
           <div class="redeem-grid">
             <div class="redeem-card">
               <div class="rc-icon">🛒</div>
               <div class="rc-name">₹50 Grocery Voucher</div>
               <div class="rc-desc">Redeemable at BigBasket, Zepto & more</div>
-              <div class="rc-cost"><div class="rc-pts">500 pts</div><button class="rc-btn" onclick="redeem(this, 5)">Redeem</button></div>
+              <div class="rc-cost"><div class="rc-pts">500 pts</div><button class="rc-btn" onclick="redeem(this, 500, 'Grocery Voucher', 50)">Redeem</button></div>
             </div>
             <div class="redeem-card">
               <div class="rc-icon">🌱</div>
               <div class="rc-name">Plant a Tree</div>
               <div class="rc-desc">We'll plant a tree in your name with GreenKraft</div>
-              <div class="rc-cost"><div class="rc-pts">1,000 pts</div><button class="rc-btn" onclick="redeem(this, 10)">Redeem</button></div>
+              <div class="rc-cost"><div class="rc-pts">1,000 pts</div><button class="rc-btn" onclick="redeem(this, 1000, 'Plant a Tree', 1000)">Redeem</button></div>
             </div>
             <div class="redeem-card">
               <div class="rc-icon">♻️</div>
               <div class="rc-name">Free Pickup Month</div>
               <div class="rc-desc">Get one month of free pickups added to your plan</div>
-              <div class="rc-cost"><div class="rc-pts">2500 pts</div><button class="rc-btn" onclick="redeem(this, 25)">Redeem</button></div>
+              <div class="rc-cost"><div class="rc-pts">2500 pts</div><button class="rc-btn" onclick="redeem(this, 2500, 'Free Pickup Month', 2500)">Redeem</button></div>
             </div>
             <div class="redeem-card locked">
               <div class="rc-lock">🔒</div>
@@ -672,83 +672,7 @@
 <script>
   const API = 'http://localhost:5000/api';
 
-  // ── LOAD REAL USER DATA ───────────────────────────────────
-  async function loadUserData() {
-    const token = localStorage.getItem('dumpit_token');
-    const userRaw = localStorage.getItem('dumpit_user');
-
-    // If not logged in, redirect to auth
-    if (!token || !userRaw) {
-      window.location.href = '/auth.html';
-      return;
-    }
-
-    const user = JSON.parse(userRaw);
-
-    // Set name everywhere
-    const firstName = user.name ? user.name.split(' ')[0] : 'Friend';
-    document.querySelectorAll('.user-name').forEach(el => el.textContent = user.name || 'User');
-
-    // Set avatar initials
-    const avatarEl = document.getElementById('userAvatar');
-    if (avatarEl && user.name) {
-      const parts = user.name.trim().split(' ');
-      avatarEl.textContent = parts.length >= 2
-        ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
-        : parts[0].substring(0,2).toUpperCase();
-    }
-
-    // Greeting with time of day
-    const hour = new Date().getHours();
-    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-    const greetEl = document.querySelector('.greeting-text');
-    if (greetEl) greetEl.innerHTML = `${greet}, <em>${firstName}</em> 🌿`;
-
-    // Update gift points balance
-    const points = user.gift_points || 0;
-    const tokenBalEl = document.getElementById('tokenBal');
-    if (tokenBalEl) tokenBalEl.textContent = points;
-    tokenBalance = points;
-
-    // Fetch fresh stats from API
-    try {
-      const res = await fetch(`${API}/pickups/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const stats = await res.json();
-        // Update stat cards with real data
-        const scVals = document.querySelectorAll('.sc-val');
-        if (scVals[0]) animCount(scVals[0], stats.gift_points || points, 0);
-        if (scVals[1]) animCount(scVals[1], stats.co2_saved || 0, 1);
-        if (scVals[2]) scVals[2].textContent = `${stats.total_waste_kg || 0}`;
-        if (scVals[3]) scVals[3].textContent = `#${stats.rank || '--'}`;
-
-        // Update streak
-        const streakNum = document.querySelector('.streak-num');
-        if (streakNum) streakNum.textContent = stats.streak_days || 0;
-
-        // Update greeting sub
-        const greetSub = document.querySelector('.greeting-sub');
-        if (greetSub) greetSub.textContent = `You have ${stats.gift_points || 0} gift points · ${stats.streak_days || 0}-day streak · ${stats.total_pickups || 0} pickups completed`;
-
-        // Update token balance
-        if (tokenBalEl) tokenBalEl.textContent = stats.gift_points || points;
-        tokenBalance = stats.gift_points || points;
-      }
-    } catch(e) {
-      console.log('Stats not available yet, showing local data');
-    }
-  }
-
-  // Logout function
-  function logout() {
-    localStorage.removeItem('dumpit_token');
-    localStorage.removeItem('dumpit_user');
-    window.location.href = '/auth.html';
-  }
-
-  // Cursor
+  // ── CURSOR ────────────────────────────────────────────────
   const cursor = document.getElementById('cursor');
   const ring = document.getElementById('cursorRing');
   let mx=0,my=0,rx=0,ry=0;
@@ -759,93 +683,10 @@
     el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='0.4';});
   });
 
-  // Date
+  // ── DATE ──────────────────────────────────────────────────
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
 
-  // Chart data
-  const chartData = {
-    weekly: {
-      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-      values: [1.2, 0.8, 1.5, 1.1, 0.9, 1.8, 1.3]
-    },
-    monthly: {
-      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'],
-      values: [28, 32, 25, 38, 31, 42, 36, 44]
-    }
-  };
-  let activeTab = 'weekly';
-
-  function renderChart(type) {
-    const data = chartData[type];
-    const vals = data.values;
-    const min = Math.min(...vals) * 0.8;
-    const max = Math.max(...vals) * 1.1;
-    const W = 600, H = 160, pad = 20;
-    const xStep = (W - pad*2) / (vals.length - 1);
-
-    const points = vals.map((v,i) => ({
-      x: pad + i * xStep,
-      y: H - pad - ((v - min) / (max - min)) * (H - pad*2)
-    }));
-
-    const linePath = points.map((p,i) => (i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`)).join(' ');
-    const areaPath = linePath + ` L${points[points.length-1].x},${H} L${points[0].x},${H} Z`;
-
-    document.getElementById('chartLinePath').setAttribute('d', linePath);
-    document.getElementById('chartAreaPath').setAttribute('d', areaPath);
-
-    const dotsG = document.getElementById('chartDots');
-    dotsG.innerHTML = '';
-    points.forEach(p => {
-      const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
-      circle.setAttribute('r', 4); circle.setAttribute('class','chart-dot');
-      dotsG.appendChild(circle);
-    });
-
-    const labelsEl = document.getElementById('chartLabels');
-    labelsEl.innerHTML = data.labels.map(l=>`<span class="chart-label">${l}</span>`).join('');
-  }
-
-  function switchTab(el, type) {
-    document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active'));
-    el.classList.add('active');
-    activeTab = type;
-    renderChart(type);
-  }
-
-  renderChart('weekly');
-
-  // Streak dots
-  const streakEl = document.getElementById('streakDots');
-  const today = 21; // Feb 21
-  for (let d = 1; d <= 28; d++) {
-    const div = document.createElement('div');
-    div.className = 'streak-dot';
-    div.textContent = d;
-    if (d === today) div.classList.add('today');
-    else if (d < today) {
-      // 18 done out of 20 passed (missed day 17)
-      div.classList.add(d === 17 ? 'missed' : 'done');
-    } else {
-      div.classList.add('upcoming');
-    }
-    streakEl.appendChild(div);
-  }
-
-  // Redeem
-  let tokenBalance = 28;
-  function redeem(btn, cost) {
-    if (tokenBalance < cost) { alert('Not enough tokens!'); return; }
-    if (btn.classList.contains('disabled')) return;
-    tokenBalance -= cost;
-    document.getElementById('tokenBal').textContent = tokenBalance;
-    btn.textContent = '✓ Done';
-    btn.style.background = 'var(--green-bright)';
-    btn.disabled = true;
-  }
-
-  // Animate stat numbers
+  // ── ANIMATE COUNT ─────────────────────────────────────────
   function animCount(el, target, decimals=0) {
     let start = 0;
     const step = ts => {
@@ -858,23 +699,398 @@
     requestAnimationFrame(step);
   }
 
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        const vals = [2840, 47.2, 138, 4];
-        const decs = [0, 1, 0, 0];
-        document.querySelectorAll('.sc-val').forEach((el,i) => {
-          if (i === 3) { el.textContent = '#4'; return; }
-          animCount(el, vals[i], decs[i]);
-        });
-        observer.disconnect();
+  // ── CHART ─────────────────────────────────────────────────
+  const chartData = {
+    weekly: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], values: [0,0,0,0,0,0,0] },
+    monthly: { labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], values: [0,0,0,0,0,0,0,0,0,0,0,0] }
+  };
+
+  function renderChart(type) {
+    const data = chartData[type];
+    const vals = data.values;
+    const min = Math.min(...vals) * 0.8;
+    const max = Math.max(...vals) * 1.1 || 1;
+    const W = 600, H = 160, pad = 20;
+    const xStep = (W - pad*2) / Math.max(vals.length - 1, 1);
+    const points = vals.map((v,i) => ({
+      x: pad + i * xStep,
+      y: H - pad - ((v - min) / (max - min || 1)) * (H - pad*2)
+    }));
+    const linePath = points.map((p,i) => (i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`)).join(' ');
+    const areaPath = linePath + ` L${points[points.length-1].x},${H} L${points[0].x},${H} Z`;
+    document.getElementById('chartLinePath').setAttribute('d', linePath);
+    document.getElementById('chartAreaPath').setAttribute('d', areaPath);
+    const dotsG = document.getElementById('chartDots');
+    dotsG.innerHTML = '';
+    points.forEach(p => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+      circle.setAttribute('r', 4); circle.setAttribute('class','chart-dot');
+      dotsG.appendChild(circle);
+    });
+    document.getElementById('chartLabels').innerHTML = data.labels.map(l=>`<span class="chart-label">${l}</span>`).join('');
+  }
+
+  function switchTab(el, type) {
+    document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    renderChart(type);
+  }
+  renderChart('weekly');
+
+  // ── LOGOUT ────────────────────────────────────────────────
+  function logout() {
+    localStorage.removeItem('dumpit_token');
+    localStorage.removeItem('dumpit_user');
+    window.location.href = '/auth.html';
+  }
+
+  // ── REDEEM — REAL API ─────────────────────────────────────
+  let tokenBalance = 0;
+
+  async function redeem(btn, cost, brand, voucherAmt) {
+    const token = localStorage.getItem('dumpit_token');
+    if (!token) { alert('Please login first!'); return; }
+    if (tokenBalance < cost) {
+      alert(`Not enough points! You need ${cost} pts but have ${tokenBalance} pts.`);
+      return;
+    }
+    if (btn.classList.contains('disabled') || btn.disabled) return;
+
+    btn.textContent = '⏳...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API}/redemptions/redeem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ brand: brand || 'Voucher', points_used: cost, voucher_amount: voucherAmt || cost*10 })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // Update balance from server response (most accurate)
+        tokenBalance = data.remaining_points !== undefined ? data.remaining_points : tokenBalance - cost;
+        document.getElementById('tokenBal').textContent = tokenBalance;
+        if (document.getElementById('redeemBalance')) document.getElementById('redeemBalance').textContent = tokenBalance + ' pts';
+        btn.textContent = '✓ Done';
+        btn.style.background = 'var(--green-bright)';
+        btn.disabled = true;
+        updateRedeemLocks();
+
+        // Update localStorage so refresh also shows correct points
+        const userRaw = localStorage.getItem('dumpit_user');
+        if (userRaw) {
+          const user = JSON.parse(userRaw);
+          user.gift_points = tokenBalance;
+          localStorage.setItem('dumpit_user', JSON.stringify(user));
+        }
+
+        // Show voucher code in nice alert
+        const code = data.voucher_code || ('DUMP' + Date.now().toString().slice(-6));
+        alert(`🎉 Redeemed Successfully!\n\nVoucher Code: ${code}\n\nSave this code — use it at checkout!`);
+      } else {
+        alert(data.error || 'Redemption failed. Try again!');
+        btn.textContent = 'Redeem';
+        btn.disabled = false;
+      }
+    } catch(e) {
+      // Fallback — local deduction if server unreachable
+      tokenBalance -= cost;
+      document.getElementById('tokenBal').textContent = tokenBalance;
+      if (document.getElementById('redeemBalance')) document.getElementById('redeemBalance').textContent = tokenBalance + ' pts';
+      btn.textContent = '✓ Done';
+      btn.style.background = 'var(--green-bright)';
+      btn.disabled = true;
+      updateRedeemLocks();
+      const userRaw = localStorage.getItem('dumpit_user');
+      if (userRaw) {
+        const user = JSON.parse(userRaw);
+        user.gift_points = tokenBalance;
+        localStorage.setItem('dumpit_user', JSON.stringify(user));
+      }
+      alert('🎉 Redeemed! Code: DUMP' + Date.now().toString().slice(-6));
+    }
+  }
+
+  function updateRedeemLocks() {
+    // Unlock/lock redeem cards based on balance
+    document.querySelectorAll('.redeem-card').forEach(card => {
+      const btn = card.querySelector('.rc-btn');
+      const ptsEl = card.querySelector('.rc-pts');
+      if (!btn || !ptsEl) return;
+      const cost = parseInt(ptsEl.textContent.replace(/[^0-9]/g, ''));
+      if (tokenBalance >= cost && !btn.classList.contains('disabled') && btn.textContent !== '✓ Done') {
+        card.classList.remove('locked');
+        btn.textContent = 'Redeem';
+        btn.disabled = false;
+        card.querySelector('.rc-lock') && (card.querySelector('.rc-lock').style.display = 'none');
+      } else if (tokenBalance < cost && btn.textContent !== '✓ Done') {
+        if (cost === 5000) {
+          card.classList.add('locked');
+          btn.classList.add('disabled');
+          btn.textContent = 'Locked';
+        }
       }
     });
-  }, { threshold: 0.3 });
-  observer.observe(document.querySelector('.stats-row'));
+  }
 
-  // Load real user data on page load
-  loadUserData();
+  // ── LOAD ALL REAL DATA ────────────────────────────────────
+  async function loadAllData() {
+    const token = localStorage.getItem('dumpit_token');
+    const userRaw = localStorage.getItem('dumpit_user');
+
+    if (!token || !userRaw) {
+      window.location.href = '/auth.html';
+      return;
+    }
+
+    const user = JSON.parse(userRaw);
+    const firstName = user.name ? user.name.split(' ')[0] : 'Friend';
+
+    // Set name + avatar
+    document.querySelectorAll('.user-name').forEach(el => el.textContent = user.name || 'User');
+    const avatarEl = document.getElementById('userAvatar');
+    if (avatarEl && user.name) {
+      const parts = user.name.trim().split(' ');
+      avatarEl.textContent = parts.length >= 2
+        ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+        : parts[0].substring(0,2).toUpperCase();
+    }
+
+    // Greeting
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const greetEl = document.querySelector('.greeting-text');
+    if (greetEl) greetEl.innerHTML = `${greet}, <em>${firstName}</em> 🌿`;
+
+    // Local points first (fast)
+    tokenBalance = user.gift_points || 0;
+    document.getElementById('tokenBal').textContent = tokenBalance;
+    document.getElementById('redeemBalance') && (document.getElementById('redeemBalance').textContent = tokenBalance + ' pts');
+
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    // ── 1. STATS ─────────────────────────────────────────────
+    try {
+      const res = await fetch(`${API}/pickups/stats`, { headers });
+      if (res.ok) {
+        const s = await res.json();
+        tokenBalance = s.gift_points || 0;
+
+        // Stat cards
+        const scVals = document.querySelectorAll('.sc-val');
+        if (scVals[0]) animCount(scVals[0], s.gift_points || 0, 0);
+        if (scVals[1]) animCount(scVals[1], parseFloat(s.total_co2_saved) || 0, 1);
+        if (scVals[2]) {
+          animCount(scVals[2], parseFloat(s.total_waste_kg) || 0, 1);
+          const sub = scVals[2].closest('.stat-card')?.querySelector('.sc-sub');
+          if (sub) sub.textContent = `kg total · ${s.total_pickups || 0} pickups`;
+        }
+        if (scVals[3]) scVals[3].textContent = `#${s.neighbourhood_rank || '--'}`;
+
+        // Streak
+        const streakNum = document.querySelector('.streak-num');
+        if (streakNum) streakNum.textContent = s.streak_days || 0;
+
+        // Greeting sub
+        const greetSub = document.querySelector('.greeting-sub');
+        if (greetSub) greetSub.textContent = `You have ${s.gift_points || 0} gift points · ${s.streak_days || 0}-day streak · ${s.total_pickups || 0} pickups done`;
+
+        // Token balance card
+        document.getElementById('tokenBal').textContent = s.gift_points || 0;
+        if (document.getElementById('redeemBalance')) document.getElementById('redeemBalance').textContent = (s.gift_points || 0) + ' pts';
+
+        // Progress bar
+        const nextMilestone = Math.ceil((s.gift_points || 0) / 1000) * 1000 || 1000;
+        const prevMilestone = nextMilestone - 1000;
+        const progress = ((s.gift_points - prevMilestone) / 1000) * 100;
+        const barEl = document.getElementById('tokenBar');
+        if (barEl) barEl.style.width = Math.min(progress, 100) + '%';
+        const progressEl = document.getElementById('tokenProgress');
+        if (progressEl) progressEl.textContent = `${s.gift_points || 0} / ${nextMilestone} pts`;
+        const nextEl = document.querySelector('.tb-next');
+        if (nextEl) nextEl.textContent = `🎯 ${nextMilestone - (s.gift_points || 0)} more points to reach ${nextMilestone}!`;
+
+        updateRedeemLocks();
+
+        // Streak dots — real current month
+        renderStreakDots(s.streak_days || 0);
+      }
+    } catch(e) { console.log('Stats error:', e); }
+
+    // ── 2. PICKUP HISTORY ─────────────────────────────────────
+    try {
+      const res = await fetch(`${API}/pickups`, { headers });
+      if (res.ok) {
+        const pickups = await res.json();
+        renderHistory(pickups);
+      }
+    } catch(e) { console.log('History error:', e); }
+
+    // ── 3. UPCOMING PICKUPS ───────────────────────────────────
+    try {
+      const res = await fetch(`${API}/pickups/upcoming`, { headers });
+      if (res.ok) {
+        const upcoming = await res.json();
+        renderUpcoming(upcoming);
+      }
+    } catch(e) { console.log('Upcoming error:', e); }
+
+    // ── 4. LEADERBOARD ────────────────────────────────────────
+    try {
+      const res = await fetch(`${API}/leaderboard`, { headers });
+      if (res.ok) {
+        const lb = await res.json();
+        renderLeaderboard(lb, user);
+      }
+    } catch(e) { console.log('Leaderboard error:', e); }
+  }
+
+  // ── RENDER HISTORY ────────────────────────────────────────
+  function renderHistory(pickups) {
+    const list = document.querySelector('.history-list');
+    if (!list) return;
+    if (!pickups || pickups.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--green-mid);font-size:0.9rem;">No pickups yet! Book your first pickup 🚛</div>';
+      return;
+    }
+    const icons = { wet: '🍛', dry: '📦', bulk: '🏗️', ewaste: '💻' };
+    list.innerHTML = pickups.slice(0, 8).map(p => {
+      const date = new Date(p.pickup_date);
+      const dateStr = date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      const status = p.status === 'completed' ? 'done' : p.status === 'missed' ? 'missed' : 'scheduled';
+      const statusText = p.status === 'completed' ? 'Done' : p.status === 'missed' ? 'Missed' : 'Scheduled';
+      const pts = p.points_earned ? `+${p.points_earned} 🪙` : '—';
+      return `
+        <div class="history-item">
+          <div class="hi-date">${dateStr}</div>
+          <div class="hi-icon">${icons[p.waste_type] || '🗑️'}</div>
+          <div class="hi-info">
+            <div class="hi-type">${p.waste_type ? p.waste_type.charAt(0).toUpperCase() + p.waste_type.slice(1) + ' Waste' : 'Waste'}</div>
+            <div class="hi-weight">${p.weight_kg ? p.weight_kg + ' kg collected' : 'Scheduled'}</div>
+          </div>
+          <div class="hi-status ${status}">${statusText}</div>
+          <div class="hi-credits" ${status === 'missed' ? 'style="color:var(--green-pale)"' : ''}>${pts}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── RENDER UPCOMING ───────────────────────────────────────
+  function renderUpcoming(pickups) {
+    const list = document.querySelector('.upcoming-list');
+    if (!list) return;
+    if (!pickups || pickups.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--green-mid);font-size:0.9rem;">No upcoming pickups. <a href="booking.html" style="color:var(--green-bright)">Book now →</a></div>';
+      return;
+    }
+    const icons = { wet: '🗑️', dry: '♻️', bulk: '🚛', ewaste: '💻' };
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    list.innerHTML = pickups.slice(0, 4).map((p, i) => {
+      const date = new Date(p.pickup_date);
+      const mon = months[date.getMonth()];
+      const day = date.getDate();
+      return `
+        <div class="upcoming-item ${i === 0 ? 'next' : ''}">
+          <div class="ui-date">
+            <div style="font-size:0.65rem;font-weight:600;color:${i===0?'var(--green-bright)':'var(--green-mid)'};">${mon}</div>
+            <div class="ui-date-num">${day}</div>
+          </div>
+          <div class="ui-info">
+            <div class="ui-type">${p.waste_type ? p.waste_type.charAt(0).toUpperCase() + p.waste_type.slice(1) + ' Waste' : 'Waste'}</div>
+            <div class="ui-time">🕖 ${p.pickup_time || '7:00 AM – 9:00 AM'}</div>
+          </div>
+          <div class="ui-icon">${icons[p.waste_type] || '🚛'}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── RENDER LEADERBOARD ────────────────────────────────────
+  function renderLeaderboard(lb, currentUser) {
+    const list = document.querySelector('.lb-list');
+    if (!list || !lb || lb.length === 0) return;
+    const medals = ['gold', 'silver', 'bronze'];
+    const colors = [
+      'linear-gradient(135deg,#c9a84c,#f0d07a)',
+      'linear-gradient(135deg,#8a9ba8,#b0c4d0)',
+      'linear-gradient(135deg,#a0673a,#c9956a)',
+      'linear-gradient(135deg,#4a8c5c,#7ab88a)',
+      'linear-gradient(135deg,#3d5a8b,#6b8bc9)',
+      'linear-gradient(135deg,#6b4226,#a0673a)'
+    ];
+
+    list.innerHTML = lb.slice(0, 6).map((item, i) => {
+      const isYou = item.is_you || item.user_id === currentUser?.id;
+      const initial = (item.name || 'U')[0].toUpperCase();
+      const nameParts = (item.name || 'User').split(' ');
+      const displayName = isYou ? 'You'
+        : nameParts[0] + (nameParts[1] ? ' ' + nameParts[1][0] + '.' : '');
+      return `
+        <div class="lb-item ${isYou ? 'you' : ''}">
+          <div class="lb-rank ${medals[i] || ''}" style="${isYou ? 'color:var(--green-bright);font-weight:800;' : ''}">${i+1}</div>
+          <div class="lb-avatar" style="background:${colors[i] || colors[3]};">${initial}</div>
+          <div class="lb-name">${displayName} ${isYou ? '<span class="lb-you-tag">YOU</span>' : ''}</div>
+          <div class="lb-pts">${(item.total_points || 0).toLocaleString()} pts</div>
+        </div>`;
+    }).join('');
+
+    // Update "Earn X more points" message
+    const myEntry = lb.find(item => item.is_you || item.user_id === currentUser?.id);
+    const msgEl = document.querySelector('#leaderboard > div:last-child');
+    if (myEntry && msgEl) {
+      const myRank = myEntry.rank;
+      const myPts  = myEntry.total_points || 0;
+      if (myRank === 1) {
+        msgEl.innerHTML = '🏆 You are <strong style="color:var(--gold)">RANK #1</strong>! Defend your crown!';
+      } else {
+        const above = lb[myRank - 2]; // 0-indexed, person just above
+        if (above) {
+          const diff = Math.max((above.total_points || 0) - myPts, 0);
+          if (diff === 0) {
+            msgEl.innerHTML = `🔥 You're tied with #${myRank-1}! <strong style="color:var(--green-bright)">Keep going!</strong>`;
+          } else {
+            msgEl.innerHTML = `💪 Earn <strong style="color:var(--green-bright)">${diff.toLocaleString()} more points</strong> to reach #${myRank - 1}!`;
+          }
+        }
+      }
+    }
+  }
+
+  // ── RENDER STREAK DOTS ────────────────────────────────────
+  function renderStreakDots(streakDays) {
+    const streakEl = document.getElementById('streakDots');
+    if (!streakEl) return;
+    streakEl.innerHTML = '';
+    const now = new Date();
+    const todayNum = now.getDate();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const div = document.createElement('div');
+      div.className = 'streak-dot';
+      div.textContent = d;
+      if (d === todayNum) div.classList.add('today');
+      else if (d < todayNum) {
+        const daysAgo = todayNum - d;
+        div.classList.add(daysAgo <= streakDays ? 'done' : 'missed');
+      } else div.classList.add('upcoming');
+      streakEl.appendChild(div);
+    }
+
+    // Update streak label
+    const streakLabel = document.querySelector('.streak-num');
+    if (streakLabel) streakLabel.textContent = streakDays;
+    const streakSub = document.querySelector('.streak-label');
+    if (streakSub) streakSub.textContent = `days in a row${streakDays >= 30 ? ' 🎉' : ' · +200 bonus at 30!'}`;
+    const daysLeft = 30 - streakDays;
+    const streakMsg = document.querySelector('[id="streakDots"] + div');
+    if (daysLeft > 0) {
+      const msgEl = document.querySelector('.section-card .streak-week + div');
+      if (msgEl) msgEl.innerHTML = `🎯 ${daysLeft} more days to unlock the <strong style="color:var(--gold)">30-day streak bonus (+200 credits)</strong>!`;
+    }
+  }
+
+  // ── INIT ──────────────────────────────────────────────────
+  loadAllData();
 </script>
 
 </body>

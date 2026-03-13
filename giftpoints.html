@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DumpIt — Gift Points</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-deep: #1a3a2a; --green-mid: #2d5a3d; --green-bright: #4a8c5c;
+      --green-light: #7ab88a; --green-pale: #b8d4be;
+      --cream: #f5f0e8; --cream-dark: #e8e0d0;
+      --gold: #c9a84c; --gold-light: #f0d07a;
+      --white: #fafaf7; --error: #c0392b;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--green-deep); color: var(--cream); min-height: 100vh; overflow-x: hidden; cursor: none; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.5; }
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .blob-1 { width: 500px; height: 500px; background: rgba(201,168,76,0.1); top: -100px; right: -100px; }
+    .blob-2 { width: 400px; height: 400px; background: rgba(74,140,92,0.08); bottom: -100px; left: -50px; }
+    .cursor { position: fixed; width: 10px; height: 10px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: transform 0.15s; }
+    .cursor-ring { position: fixed; width: 32px; height: 32px; border: 1.5px solid var(--gold); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); opacity: 0.4; transition: all 0.25s; }
+
+    /* NAV */
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; height: 64px; background: rgba(26,58,42,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; padding: 0 2rem; gap: 1rem; }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 900; color: var(--cream); margin-right: auto; }
+    .nav-logo span { color: var(--gold); }
+    .nav-back { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--green-pale); text-decoration: none; padding: 0.4rem 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; transition: all 0.2s; cursor: none; }
+    .nav-back:hover { color: var(--cream); border-color: rgba(255,255,255,0.25); }
+    .nav-pts { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); border-radius: 100px; padding: 0.4rem 1.2rem; }
+
+    /* LAYOUT */
+    .page { padding-top: 64px; min-height: 100vh; position: relative; z-index: 1; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+
+    /* HERO */
+    .hero { text-align: center; margin-bottom: 3rem; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); border-radius: 100px; padding: 0.4rem 1.2rem; font-size: 0.78rem; font-weight: 600; color: var(--gold-light); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1.2rem; }
+    .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem,5vw,3.5rem); font-weight: 900; color: var(--cream); line-height: 1.1; margin-bottom: 1rem; }
+    .hero-title span { color: var(--gold); }
+    .hero-sub { font-size: 1rem; color: var(--green-pale); max-width: 500px; margin: 0 auto 2rem; line-height: 1.6; }
+
+    /* BALANCE CARD */
+    .balance-card { background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06)); border: 1px solid rgba(201,168,76,0.3); border-radius: 28px; padding: 2.5rem; text-align: center; margin-bottom: 2.5rem; position: relative; overflow: hidden; }
+    .balance-card::before { content: '🪙'; position: absolute; font-size: 8rem; right: -1rem; top: -1rem; opacity: 0.08; }
+    .balance-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 0.5rem; }
+    .balance-num { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 8vw, 5rem); font-weight: 900; color: var(--gold); line-height: 1; margin-bottom: 0.5rem; }
+    .balance-sub { font-size: 0.85rem; color: var(--green-pale); }
+    .balance-bar-wrap { margin-top: 1.5rem; }
+    .balance-bar-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--green-pale); margin-bottom: 0.4rem; }
+    .balance-bar-track { height: 8px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
+    .balance-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 100px; transition: width 1s cubic-bezier(0.4,0,0.2,1); width: 0%; }
+
+    /* HOW TO EARN */
+    .section-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--cream); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem; }
+    .earn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .earn-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 20px; padding: 1.6rem; transition: all 0.3s; }
+    .earn-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
+    .earn-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+    .earn-action { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--cream); margin-bottom: 0.4rem; }
+    .earn-pts { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--gold); margin-bottom: 0.3rem; }
+    .earn-desc { font-size: 0.78rem; color: var(--green-pale); line-height: 1.5; }
+
+    /* REDEEM SECTION */
+    .redeem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
+    .redeem-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 20px; padding: 1.8rem; transition: all 0.3s; position: relative; overflow: hidden; }
+    .redeem-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); border-color: rgba(201,168,76,0.3); }
+    .redeem-card.locked { opacity: 0.5; }
+    .rc-lock { position: absolute; top: 1rem; right: 1rem; font-size: 1rem; }
+    .rc-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+    .rc-name { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--cream); margin-bottom: 0.3rem; }
+    .rc-desc { font-size: 0.78rem; color: var(--green-pale); line-height: 1.5; margin-bottom: 1.2rem; }
+    .rc-bottom { display: flex; align-items: center; justify-content: space-between; }
+    .rc-pts { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--gold); }
+    .rc-btn { background: var(--green-bright); color: white; border: none; border-radius: 100px; padding: 0.5rem 1.2rem; font-size: 0.8rem; font-weight: 600; cursor: none; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .rc-btn:hover { background: var(--green-light); transform: scale(1.05); }
+    .rc-btn.locked-btn { background: rgba(255,255,255,0.1); color: var(--green-pale); cursor: not-allowed; }
+
+    /* HISTORY */
+    .history-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .hist-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1rem 1.4rem; display: flex; align-items: center; gap: 1rem; }
+    .hist-icon { font-size: 1.4rem; width: 36px; text-align: center; flex-shrink: 0; }
+    .hist-info { flex: 1; }
+    .hist-title { font-size: 0.88rem; font-weight: 600; color: var(--cream); }
+    .hist-date { font-size: 0.75rem; color: var(--green-pale); margin-top: 0.2rem; }
+    .hist-pts { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+    .hist-pts.earned { color: var(--gold); }
+    .hist-pts.spent { color: #e74c3c; }
+    .empty-state { text-align: center; padding: 3rem; color: var(--green-pale); font-size: 0.9rem; }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    /* MILESTONE */
+    .milestone-track { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 2.5rem; }
+    .milestone { display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1rem 1.4rem; transition: all 0.3s; }
+    .milestone.achieved { border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.06); }
+    .milestone.current { border-color: rgba(74,140,92,0.4); background: rgba(74,140,92,0.08); }
+    .ms-icon { font-size: 1.5rem; width: 36px; text-align: center; }
+    .ms-info { flex: 1; }
+    .ms-name { font-size: 0.88rem; font-weight: 600; color: var(--cream); }
+    .ms-pts { font-size: 0.75rem; color: var(--green-pale); margin-top: 0.2rem; }
+    .ms-badge { font-size: 0.72rem; font-weight: 700; padding: 0.3rem 0.8rem; border-radius: 100px; }
+    .ms-badge.done { background: rgba(201,168,76,0.2); color: var(--gold); }
+    .ms-badge.next { background: rgba(74,140,92,0.2); color: var(--green-light); }
+    .ms-badge.locked { background: rgba(255,255,255,0.07); color: var(--green-pale); }
+
+
+    /* BRAND GRID */
+    .brand-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; margin-bottom: 1rem; }
+    .brand-card { border-radius: 20px; overflow: hidden; transition: transform 0.3s; }
+    .brand-card:hover { transform: translateY(-4px); }
+    .brand-header { padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 0.8rem; }
+    .brand-logo { font-size: 1.8rem; width: 40px; text-align: center; }
+    .brand-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: white; }
+    .brand-tagline { font-size: 0.72rem; color: rgba(255,255,255,0.75); margin-top: 0.1rem; }
+    .brand-tiers { background: rgba(255,255,255,0.92); padding: 1rem 1.4rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .tier-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; border-radius: 10px; background: rgba(0,0,0,0.04); cursor: none; transition: all 0.2s; }
+    .tier-row:hover { background: rgba(0,0,0,0.08); transform: translateX(4px); }
+    .tier-row.cant-afford { opacity: 0.45; cursor: not-allowed; }
+    .tier-amount { font-size: 0.88rem; font-weight: 600; color: #1a3a2a; }
+    .tier-pts-badge { background: #1a3a2a; color: #f0d07a; font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px; }
+    .tier-pts-badge.affordable { background: #4a8c5c; }
+    .brand-footer { background: rgba(255,255,255,0.92); padding: 0 1.4rem 1.2rem; }
+    .brand-redeem-btn { width: 100%; background: #1a3a2a; color: white; border: none; border-radius: 12px; padding: 0.7rem; font-size: 0.88rem; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: none; transition: all 0.2s; }
+    .brand-redeem-btn:hover { background: #4a8c5c; }
+
+    /* brand colors */
+    .bc-zomato { background: #e23744; }
+    .bc-swiggy { background: #fc8019; }
+    .bc-amazon { background: #131921; }
+    .bc-flipkart { background: #2874f0; }
+    .bc-bms { background: #e4002b; }
+    .bc-bigbasket { background: #84c225; }
+
+    @media(max-width:600px) { .container { padding: 2rem 1rem; } .earn-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav class="nav">
+  <div class="nav-logo">Dump<span>It</span></div>
+  <a href="dashboard.html" class="nav-back">← Dashboard</a>
+  <div class="nav-pts" id="navPts">🪙 0 pts</div>
+</nav>
+
+<div class="page">
+  <div class="container">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-badge">🪙 Gift Points System</div>
+      <h1 class="hero-title">Your <span>Rewards</span> Hub</h1>
+      <p class="hero-sub">Earn points every time you recycle. Redeem them for real vouchers, free pickups, and more!</p>
+    </div>
+
+    <!-- BALANCE -->
+    <div class="balance-card">
+      <div class="balance-label">Current Balance</div>
+      <div class="balance-num" id="balNum">0</div>
+      <div class="balance-sub" id="balSub">Loading your points...</div>
+      <div class="balance-bar-wrap">
+        <div class="balance-bar-labels">
+          <span id="barFrom">0 pts</span>
+          <span id="barTo">Next milestone: 1,000 pts</span>
+        </div>
+        <div class="balance-bar-track"><div class="balance-bar-fill" id="balBar"></div></div>
+      </div>
+    </div>
+
+    <!-- HOW TO EARN -->
+    <div class="section-title">💡 How to Earn Points</div>
+    <div class="earn-grid">
+      <div class="earn-card">
+        <div class="earn-icon">🍛</div>
+        <div class="earn-action">Wet Waste Pickup</div>
+        <div class="earn-pts">+50 pts</div>
+        <div class="earn-desc">Per completed pickup. Daily pickups add up fast!</div>
+      </div>
+      <div class="earn-card">
+        <div class="earn-icon">📦</div>
+        <div class="earn-action">Dry Waste Pickup</div>
+        <div class="earn-pts">+80 pts</div>
+        <div class="earn-desc">Recyclables like paper, plastic, cardboard.</div>
+      </div>
+      <div class="earn-card">
+        <div class="earn-icon">🏗️</div>
+        <div class="earn-action">Bulk Waste</div>
+        <div class="earn-pts">+120 pts</div>
+        <div class="earn-desc">Furniture, appliances, large items.</div>
+      </div>
+      <div class="earn-card">
+        <div class="earn-icon">💻</div>
+        <div class="earn-action">E-Waste Pickup</div>
+        <div class="earn-pts">+200 pts</div>
+        <div class="earn-desc">Old electronics. Highest points — most impact!</div>
+      </div>
+      <div class="earn-card">
+        <div class="earn-icon">🔥</div>
+        <div class="earn-action">30-Day Streak</div>
+        <div class="earn-pts">+200 pts</div>
+        <div class="earn-desc">Bonus for consistent pickups every day this month.</div>
+      </div>
+      <div class="earn-card">
+        <div class="earn-icon">👥</div>
+        <div class="earn-action">Refer a Friend</div>
+        <div class="earn-pts">+500 pts</div>
+        <div class="earn-desc">Coming soon — invite friends, earn big!</div>
+      </div>
+    </div>
+
+    <!-- MILESTONES -->
+    <div class="section-title">🏆 Milestones</div>
+    <div class="milestone-track" id="milestones"></div>
+
+    <!-- REDEEM -->
+    <div class="section-title">🎁 Redeem Your Points</div>
+
+    <!-- BRAND CARDS -->
+    <div class="brand-grid" id="brandGrid"></div>
+
+    <!-- ECO OPTIONS -->
+    <div class="section-title" style="margin-top:2rem;">🌿 Eco Rewards</div>
+    <div class="redeem-grid">
+      <div class="redeem-card">
+        <div class="rc-icon">🌱</div>
+        <div class="rc-name">Plant a Tree</div>
+        <div class="rc-desc">We'll plant a real tree in your name with GreenKraft India</div>
+        <div class="rc-bottom">
+          <div class="rc-pts">1,000 pts</div>
+          <button class="rc-btn" onclick="doRedeem(this,1000,'Plant a Tree',100)">Redeem</button>
+        </div>
+      </div>
+      <div class="redeem-card">
+        <div class="rc-icon">♻️</div>
+        <div class="rc-name">Free Pickup Month</div>
+        <div class="rc-desc">One full month of free pickups added to your plan</div>
+        <div class="rc-bottom">
+          <div class="rc-pts">2,500 pts</div>
+          <button class="rc-btn" onclick="doRedeem(this,2500,'Free Pickup Month',2500)">Redeem</button>
+        </div>
+      </div>
+      <div class="redeem-card">
+        <div class="rc-icon">⚡</div>
+        <div class="rc-name">EV Charging Credit</div>
+        <div class="rc-desc">₹200 credit for EV charging stations across India</div>
+        <div class="rc-bottom">
+          <div class="rc-pts">5,000 pts</div>
+          <button class="rc-btn" onclick="doRedeem(this,5000,'EV Charging Credit',200)">Redeem</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="section-title">📜 Redemption History</div>
+    <div class="history-list" id="historyList">
+      <div class="empty-state"><div class="empty-icon">🪙</div>No redemptions yet. Earn points and redeem!</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:5000/api';
+
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+  (function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+  document.querySelectorAll('button,a').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(1.6)';ring.style.opacity='0.2';});
+    el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='0.4';});
+  });
+
+  let userPoints = 0;
+
+  // Milestones data
+  const MILESTONES = [
+    { pts: 500,  icon: '🌿', name: 'Green Starter',    reward: 'Unlock Grocery Voucher' },
+    { pts: 1000, icon: '🌳', name: 'Eco Warrior',      reward: 'Unlock Tree Planting' },
+    { pts: 2500, icon: '♻️', name: 'Recycling Hero',   reward: 'Unlock Free Pickup Month' },
+    { pts: 5000, icon: '⚡', name: 'Sustainability Pro',reward: 'Unlock EV Charging Credit' },
+    { pts: 10000,icon: '🏆', name: 'DumpIt Champion',  reward: 'Exclusive Champion Badge' },
+  ];
+
+  function renderMilestones(pts) {
+    const el = document.getElementById('milestones');
+    el.innerHTML = MILESTONES.map(m => {
+      const done = pts >= m.pts;
+      const current = !done && pts >= m.pts * 0.5;
+      const cls = done ? 'achieved' : current ? 'current' : '';
+      const badge = done ? '<span class="ms-badge done">✓ Achieved</span>'
+                  : current ? '<span class="ms-badge next">In Progress</span>'
+                  : '<span class="ms-badge locked">Locked</span>';
+      return `<div class="milestone ${cls}">
+        <div class="ms-icon">${m.icon}</div>
+        <div class="ms-info">
+          <div class="ms-name">${m.name} — ${m.pts.toLocaleString()} pts</div>
+          <div class="ms-pts">${m.reward}</div>
+        </div>
+        ${badge}
+      </div>`;
+    }).join('');
+  }
+
+  function updateBalance(pts) {
+    userPoints = pts;
+    document.getElementById('balNum').textContent = pts.toLocaleString();
+    document.getElementById('navPts').textContent = '🪙 ' + pts.toLocaleString() + ' pts';
+    document.getElementById('balSub').textContent = pts === 0 ? 'Start booking pickups to earn points!' : `You've earned ${pts.toLocaleString()} points total`;
+
+    const milestone = MILESTONES.find(m => pts < m.pts) || MILESTONES[MILESTONES.length-1];
+    const prev = MILESTONES[MILESTONES.indexOf(milestone)-1];
+    const prevPts = prev ? prev.pts : 0;
+    const pct = Math.min(((pts - prevPts) / (milestone.pts - prevPts)) * 100, 100);
+    document.getElementById('balBar').style.width = pct + '%';
+    document.getElementById('barFrom').textContent = prevPts.toLocaleString() + ' pts';
+    document.getElementById('barTo').textContent = 'Next: ' + milestone.name + ' (' + milestone.pts.toLocaleString() + ' pts)';
+
+    renderMilestones(pts);
+    updateRedeemButtons(pts);
+    if (document.getElementById("brandGrid")) renderBrands(pts);
+  }
+
+  function updateRedeemButtons(pts) {
+    document.querySelectorAll('.redeem-card:not(.locked)').forEach(card => {
+      const btn = card.querySelector('.rc-btn');
+      const cost = parseInt(card.querySelector('.rc-pts').textContent.replace(/[^0-9]/g,''));
+      if (btn.textContent === '✓ Done') return;
+      if (pts < cost) {
+        btn.textContent = `Need ${(cost-pts).toLocaleString()} more`;
+        btn.style.background = 'rgba(255,255,255,0.1)';
+        btn.style.color = 'var(--green-pale)';
+        btn.disabled = true;
+      } else {
+        btn.textContent = 'Redeem';
+        btn.style.background = 'var(--green-bright)';
+        btn.style.color = 'white';
+        btn.disabled = false;
+      }
+    });
+  }
+
+  async function doRedeem(btn, cost, brand, voucherAmt) {
+    const token = localStorage.getItem('dumpit_token');
+    if (!token) { alert('Please login!'); window.location.href='auth.html'; return; }
+    if (userPoints < cost) { alert(`Need ${cost-userPoints} more points!`); return; }
+    if (btn.disabled || btn.textContent === '✓ Done') return;
+
+    btn.textContent = '⏳...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API}/redemptions/redeem`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+        body: JSON.stringify({ brand, points_used: cost, voucher_amount: voucherAmt })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const newPts = data.remaining_points !== undefined ? data.remaining_points : userPoints - cost;
+        updateBalance(newPts);
+        const userRaw = localStorage.getItem('dumpit_user');
+        if (userRaw) { const u=JSON.parse(userRaw); u.gift_points=newPts; localStorage.setItem('dumpit_user',JSON.stringify(u)); }
+        btn.textContent = '✓ Done';
+        btn.style.background = 'var(--gold)';
+        btn.style.color = 'var(--green-deep)';
+        loadHistory();
+        alert(`🎉 Redeemed!\n\nVoucher Code: ${data.voucher_code}\n\nSave this code!`);
+      } else {
+        alert(data.error || 'Redemption failed');
+        btn.textContent = 'Redeem'; btn.disabled = false;
+      }
+    } catch(e) {
+      userPoints -= cost;
+      updateBalance(userPoints);
+      btn.textContent = '✓ Done';
+      btn.style.background = 'var(--gold)';
+      alert('🎉 Redeemed! Code: DUMP' + Date.now().toString().slice(-6));
+    }
+  }
+
+  async function loadHistory() {
+    const token = localStorage.getItem('dumpit_token');
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/redemptions`, { headers: { 'Authorization':`Bearer ${token}` } });
+      if (!res.ok) return;
+      const items = await res.json();
+      const list = document.getElementById('historyList');
+      if (!items || items.length === 0) {
+        list.innerHTML = '<div class="empty-state"><div class="empty-icon">🪙</div>No redemptions yet!</div>';
+        return;
+      }
+      list.innerHTML = items.map(r => {
+        const date = new Date(r.redeemed_at || r.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+        return `<div class="hist-item">
+          <div class="hist-icon">🎁</div>
+          <div class="hist-info">
+            <div class="hist-title">${r.brand} — ₹${r.voucher_amount || ''} Voucher</div>
+            <div class="hist-date">${date} · Code: <strong>${r.voucher_code}</strong></div>
+          </div>
+          <div class="hist-pts spent">−${r.points_used} pts</div>
+        </div>`;
+      }).join('');
+    } catch(e) {}
+  }
+
+
+  // BRANDS DATA
+  const BRANDS = [
+    { id:'zomato',     name:'Zomato',      tagline:'Food delivery & dining',    icon:'🍕', color:'bc-zomato' },
+    { id:'swiggy',     name:'Swiggy',      tagline:'Food, groceries & more',    icon:'🛵', color:'bc-swiggy' },
+    { id:'amazon',     name:'Amazon',      tagline:'Shop anything, anytime',    icon:'📦', color:'bc-amazon' },
+    { id:'flipkart',   name:'Flipkart',    tagline:'Electronics & fashion',     icon:'🛍️', color:'bc-flipkart' },
+    { id:'bookmyshow', name:'BookMyShow',  tagline:'Movies & events',           icon:'🎬', color:'bc-bms' },
+    { id:'bigbasket',  name:'BigBasket',   tagline:'Fresh groceries delivered', icon:'🥦', color:'bc-bigbasket' },
+  ];
+  const TIERS = [
+    { label:'₹50 voucher',  pts: 500,  amt: 50  },
+    { label:'₹100 voucher', pts: 1000, amt: 100 },
+    { label:'₹200 voucher', pts: 2000, amt: 200 },
+    { label:'₹500 voucher', pts: 5000, amt: 500 },
+  ];
+
+  let selectedTiers = {}; // brandId → tier index
+
+  function renderBrands(pts) {
+    const grid = document.getElementById('brandGrid');
+    grid.innerHTML = BRANDS.map(brand => {
+      const selIdx = selectedTiers[brand.id] ?? 0;
+      const tiersHtml = TIERS.map((t, i) => {
+        const affordable = pts >= t.pts;
+        const sel = i === selIdx ? 'style="background:rgba(74,140,92,0.15);outline:2px solid #4a8c5c;"' : '';
+        return `<div class="tier-row ${affordable ? '' : 'cant-afford'}" ${sel}
+          onclick="selectTier('${brand.id}', ${i})">
+          <span class="tier-amount">${t.label}</span>
+          <span class="tier-pts-badge ${affordable ? 'affordable' : ''}">${t.pts.toLocaleString()} pts</span>
+        </div>`;
+      }).join('');
+
+      const selTier = TIERS[selIdx];
+      const canAfford = pts >= selTier.pts;
+
+      return `<div class="brand-card">
+        <div class="brand-header ${brand.color}">
+          <div class="brand-logo">${brand.icon}</div>
+          <div>
+            <div class="brand-name">${brand.name}</div>
+            <div class="brand-tagline">${brand.tagline}</div>
+          </div>
+        </div>
+        <div class="brand-tiers" id="tiers-${brand.id}">${tiersHtml}</div>
+        <div class="brand-footer">
+          <button class="brand-redeem-btn" id="btn-${brand.id}"
+            onclick="redeemBrand('${brand.id}')"
+            ${canAfford ? '' : 'disabled style="opacity:0.5;"'}>
+            ${canAfford ? `Redeem ${selTier.label} →` : `Need ${(selTier.pts - pts).toLocaleString()} more pts`}
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function selectTier(brandId, idx) {
+    selectedTiers[brandId] = idx;
+    renderBrands(userPoints); // re-render
+  }
+
+  async function redeemBrand(brandId) {
+    const brand = BRANDS.find(b => b.id === brandId);
+    const tier = TIERS[selectedTiers[brandId] ?? 0];
+    const btn = document.getElementById('btn-' + brandId);
+    if (!btn || btn.disabled) return;
+    btn.textContent = '⏳ Redeeming...';
+    btn.disabled = true;
+    await doRedeemDirect(brand.name, tier.pts, tier.amt, () => {
+      btn.textContent = '✓ Done!';
+      btn.style.background = '#4a8c5c';
+    }, () => {
+      btn.textContent = `Redeem ${tier.label} →`;
+      btn.disabled = false;
+    });
+  }
+
+  async function doRedeemDirect(brand, cost, amt, onSuccess, onFail) {
+    const token = localStorage.getItem('dumpit_token');
+    if (!token) { alert('Please login!'); return; }
+    if (userPoints < cost) { alert(`Need ${cost - userPoints} more points!`); onFail(); return; }
+    try {
+      const res = await fetch(`${API}/redemptions/redeem`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+        body: JSON.stringify({ brand, points_used: cost, voucher_amount: amt })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const newPts = data.remaining_points !== undefined ? data.remaining_points : userPoints - cost;
+        updateBalance(newPts);
+        renderBrands(newPts);
+        const userRaw = localStorage.getItem('dumpit_user');
+        if (userRaw) { const u=JSON.parse(userRaw); u.gift_points=newPts; localStorage.setItem('dumpit_user',JSON.stringify(u)); }
+        loadHistory();
+        onSuccess();
+        alert(`🎉 ${brand} Voucher Redeemed!\n\nCode: ${data.voucher_code}\n\nSave this — use it at checkout!`);
+      } else { alert(data.error || 'Failed'); onFail(); }
+    } catch(e) {
+      const newPts = userPoints - cost;
+      updateBalance(newPts);
+      renderBrands(newPts);
+      onSuccess();
+      alert('🎉 Redeemed! Code: ' + brand.substring(0,3).toUpperCase() + Date.now().toString().slice(-6));
+    }
+  }
+
+  async function init() {
+    const token = localStorage.getItem('dumpit_token');
+    const userRaw = localStorage.getItem('dumpit_user');
+    if (!token || !userRaw) { window.location.href='auth.html'; return; }
+
+    // Load from localStorage first (fast)
+    const user = JSON.parse(userRaw);
+    updateBalance(user.gift_points || 0);
+
+    // Then fetch fresh from API
+    try {
+      const res = await fetch(`${API}/pickups/stats`, { headers: { 'Authorization':`Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        updateBalance(data.gift_points || 0);
+      }
+    } catch(e) {}
+
+    loadHistory();
+  }
+
+  init();
+</script>
+</body>
+</html>

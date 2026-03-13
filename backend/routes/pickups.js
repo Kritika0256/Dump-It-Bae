@@ -96,18 +96,25 @@ router.get('/stats', auth, async (req, res) => {
       [req.user.id]
     );
 
-    const [rank] = await db.query(
-      'SELECT COUNT(*) + 1 as rank FROM leaderboard WHERE score > (SELECT score FROM leaderboard WHERE user_id = ?)',
-      [req.user.id]
-    );
+    // Safe rank query — user may not be in leaderboard yet
+    let rankNum = 1;
+    try {
+      const [rank] = await db.query(
+        'SELECT COUNT(*) + 1 as rank FROM leaderboard WHERE score > COALESCE((SELECT score FROM leaderboard WHERE user_id = ?), 0)',
+        [req.user.id]
+      );
+      rankNum = rank[0]?.rank || 1;
+    } catch(rankErr) {
+      rankNum = 1;
+    }
 
     res.json({
       gift_points: user[0]?.gift_points || 0,
       streak_days: user[0]?.streak_days || 0,
+      neighbourhood_rank: rankNum,
       total_waste_kg: parseFloat(stats[0]?.total_waste || 0).toFixed(1),
       total_co2_saved: parseFloat(stats[0]?.total_co2 || 0).toFixed(1),
       total_pickups: stats[0]?.total_pickups || 0,
-      neighbourhood_rank: rank[0]?.rank || 1
     });
 
   } catch (err) {

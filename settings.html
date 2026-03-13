@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DumpIt — Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-deep: #1a3a2a; --green-mid: #2d5a3d; --green-bright: #4a8c5c;
+      --green-light: #7ab88a; --green-pale: #b8d4be;
+      --cream: #f5f0e8; --cream-dark: #e8e0d0;
+      --gold: #c9a84c; --gold-light: #f0d07a;
+      --white: #fafaf7; --error: #c0392b;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--green-deep); color: var(--cream); min-height: 100vh; overflow-x: hidden; cursor: none; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.5; }
+    .blob { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+    .blob-1 { width: 500px; height: 500px; background: rgba(74,140,92,0.1); top: -100px; right: -100px; }
+    .blob-2 { width: 400px; height: 400px; background: rgba(201,168,76,0.07); bottom: -100px; left: -50px; }
+    .cursor { position: fixed; width: 10px; height: 10px; background: var(--green-light); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: transform 0.15s; }
+    .cursor-ring { position: fixed; width: 32px; height: 32px; border: 1.5px solid var(--green-light); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); opacity: 0.4; transition: all 0.25s; }
+
+    /* NAV */
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; height: 64px; background: rgba(26,58,42,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; padding: 0 2rem; gap: 1rem; }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 900; color: var(--cream); margin-right: auto; }
+    .nav-logo span { color: var(--gold); }
+    .nav-back { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--green-pale); text-decoration: none; padding: 0.4rem 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; transition: all 0.2s; cursor: none; }
+    .nav-back:hover { color: var(--cream); border-color: rgba(255,255,255,0.25); }
+
+    /* LAYOUT */
+    .page { padding-top: 64px; min-height: 100vh; position: relative; z-index: 1; }
+    .container { max-width: 800px; margin: 0 auto; padding: 3rem 2rem; }
+
+    /* PROFILE CARD */
+    .profile-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; padding: 2rem; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+    .profile-avatar { width: 72px; height: 72px; background: linear-gradient(135deg, var(--green-bright), var(--green-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: white; flex-shrink: 0; }
+    .profile-name { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--cream); }
+    .profile-email { font-size: 0.85rem; color: var(--green-pale); margin-top: 0.2rem; }
+    .profile-badge { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.25); border-radius: 100px; padding: 0.25rem 0.8rem; font-size: 0.72rem; font-weight: 600; color: var(--gold-light); margin-top: 0.5rem; }
+    .edit-profile-btn { margin-left: auto; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: var(--cream); border-radius: 100px; padding: 0.5rem 1.2rem; font-size: 0.82rem; font-family: 'DM Sans', sans-serif; cursor: none; transition: all 0.2s; }
+    .edit-profile-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* SECTION */
+    .settings-section { margin-bottom: 2rem; }
+    .section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-pale); margin-bottom: 0.8rem; padding-left: 0.2rem; }
+    .settings-group { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; }
+    .setting-row { display: flex; align-items: center; padding: 1rem 1.4rem; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; cursor: none; }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-row:hover { background: rgba(255,255,255,0.04); }
+    .setting-icon { font-size: 1.2rem; width: 32px; margin-right: 1rem; text-align: center; flex-shrink: 0; }
+    .setting-info { flex: 1; }
+    .setting-name { font-size: 0.9rem; font-weight: 500; color: var(--cream); }
+    .setting-desc { font-size: 0.75rem; color: var(--green-pale); margin-top: 0.2rem; }
+    .setting-right { margin-left: auto; display: flex; align-items: center; gap: 0.8rem; }
+
+    /* TOGGLE */
+    .toggle { position: relative; width: 44px; height: 24px; cursor: none; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,0.15); border-radius: 100px; transition: 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: 0.3s; }
+    .toggle input:checked + .toggle-slider { background: var(--green-bright); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* INPUT */
+    .setting-input { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 0.4rem 0.8rem; color: var(--cream); font-size: 0.85rem; font-family: 'DM Sans', sans-serif; width: 140px; outline: none; cursor: text; }
+    .setting-input:focus { border-color: var(--green-bright); }
+
+    /* SELECT */
+    .setting-select { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 0.4rem 0.8rem; color: var(--cream); font-size: 0.85rem; font-family: 'DM Sans', sans-serif; outline: none; cursor: none; }
+    .setting-select option { background: var(--green-deep); }
+
+    /* ARROW */
+    .setting-arrow { color: var(--green-pale); font-size: 0.9rem; }
+
+    /* DANGER ZONE */
+    .danger-group { background: rgba(192,57,43,0.06); border: 1px solid rgba(192,57,43,0.2); border-radius: 20px; overflow: hidden; }
+    .danger-row { display: flex; align-items: center; padding: 1rem 1.4rem; border-bottom: 1px solid rgba(192,57,43,0.1); cursor: none; transition: background 0.2s; }
+    .danger-row:last-child { border-bottom: none; }
+    .danger-row:hover { background: rgba(192,57,43,0.08); }
+    .danger-name { font-size: 0.9rem; font-weight: 500; color: #e74c3c; }
+    .danger-desc { font-size: 0.75rem; color: rgba(231,76,60,0.7); margin-top: 0.2rem; }
+
+    /* SAVE BTN */
+    .save-btn { width: 100%; background: var(--green-bright); color: white; border: none; border-radius: 16px; padding: 1rem; font-size: 1rem; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: none; transition: all 0.2s; margin-top: 1rem; }
+    .save-btn:hover { background: var(--green-light); transform: translateY(-2px); }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--green-bright); color: white; padding: 0.8rem 1.8rem; border-radius: 100px; font-size: 0.88rem; font-weight: 600; z-index: 9999; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* EDIT MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--green-mid); border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; padding: 2rem; width: 90%; max-width: 440px; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--cream); margin-bottom: 1.5rem; }
+    .modal-field { margin-bottom: 1rem; }
+    .modal-label { font-size: 0.78rem; font-weight: 600; color: var(--green-pale); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.4rem; display: block; }
+    .modal-input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 0.7rem 1rem; color: var(--cream); font-size: 0.9rem; font-family: 'DM Sans', sans-serif; outline: none; cursor: text; }
+    .modal-input:focus { border-color: var(--green-bright); }
+    .modal-btns { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+    .modal-save { flex: 1; background: var(--green-bright); color: white; border: none; border-radius: 12px; padding: 0.7rem; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: none; transition: all 0.2s; }
+    .modal-cancel { flex: 1; background: rgba(255,255,255,0.07); color: var(--cream); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 0.7rem; font-family: 'DM Sans', sans-serif; cursor: none; transition: all 0.2s; }
+
+    @media(max-width:600px){ .profile-card { flex-direction: column; text-align: center; } .edit-profile-btn { margin: 0 auto; } }
+  </style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="toast" id="toast">✓ Settings saved!</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Profile</div>
+    <div class="modal-field">
+      <label class="modal-label">Full Name</label>
+      <input class="modal-input" id="editName" type="text" placeholder="Your full name"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Phone Number</label>
+      <input class="modal-input" id="editPhone" type="tel" placeholder="+91 98765 43210"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Area / Neighbourhood</label>
+      <input class="modal-input" id="editArea" type="text" placeholder="Koramangala, Bengaluru"/>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-save" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-logo">Dump<span>It</span></div>
+  <a href="dashboard.html" class="nav-back">← Dashboard</a>
+</nav>
+
+<div class="page">
+  <div class="container">
+
+    <!-- PROFILE -->
+    <div class="profile-card">
+      <div class="profile-avatar" id="settingsAvatar">KY</div>
+      <div>
+        <div class="profile-name" id="settingsName">Loading...</div>
+        <div class="profile-email" id="settingsEmail">—</div>
+        <div class="profile-badge">🟢 Active Member</div>
+      </div>
+      <button class="edit-profile-btn" onclick="openModal()">✏️ Edit Profile</button>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="settings-section">
+      <div class="section-label">🔔 Notifications</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-icon">🚛</div>
+          <div class="setting-info">
+            <div class="setting-name">Pickup Reminders</div>
+            <div class="setting-desc">Get notified the evening before your pickup</div>
+          </div>
+          <div class="setting-right">
+            <label class="toggle"><input type="checkbox" id="tog-pickup" checked><div class="toggle-slider"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-icon">🪙</div>
+          <div class="setting-info">
+            <div class="setting-name">Points Earned</div>
+            <div class="setting-desc">Notify when you earn gift points</div>
+          </div>
+          <div class="setting-right">
+            <label class="toggle"><input type="checkbox" id="tog-points" checked><div class="toggle-slider"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-icon">🔥</div>
+          <div class="setting-info">
+            <div class="setting-name">Streak Alerts</div>
+            <div class="setting-desc">Alert when your streak is at risk</div>
+          </div>
+          <div class="setting-right">
+            <label class="toggle"><input type="checkbox" id="tog-streak" checked><div class="toggle-slider"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-icon">📢</div>
+          <div class="setting-info">
+            <div class="setting-name">Promotional Offers</div>
+            <div class="setting-desc">Bonus points events and offers</div>
+          </div>
+          <div class="setting-right">
+            <label class="toggle"><input type="checkbox" id="tog-promo"><div class="toggle-slider"></div></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PICKUP PREFERENCES -->
+    <div class="settings-section">
+      <div class="section-label">🗑️ Pickup Preferences</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-icon">🕖</div>
+          <div class="setting-info">
+            <div class="setting-name">Preferred Time Slot</div>
+            <div class="setting-desc">Default time for your pickups</div>
+          </div>
+          <div class="setting-right">
+            <select class="setting-select" id="sel-time">
+              <option>7:00 AM – 9:00 AM</option>
+              <option>9:00 AM – 11:00 AM</option>
+              <option>11:00 AM – 1:00 PM</option>
+              <option>4:00 PM – 6:00 PM</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-icon">📍</div>
+          <div class="setting-info">
+            <div class="setting-name">Default Address</div>
+            <div class="setting-desc">Pre-fill your address in booking form</div>
+          </div>
+          <div class="setting-right">
+            <input class="setting-input" id="inp-address" type="text" placeholder="Your area..."/>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-icon">♻️</div>
+          <div class="setting-info">
+            <div class="setting-name">Auto Dry Waste Add-on</div>
+            <div class="setting-desc">Pre-select dry waste in every booking</div>
+          </div>
+          <div class="setting-right">
+            <label class="toggle"><input type="checkbox" id="tog-dry"><div class="toggle-slider"></div></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIVACY -->
+    <div class="settings-section">
+      <div class="section-label">🔒 Privacy</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-icon">🏆</div>
+          <div class="setting-info">
+            <div class="setting-name">Show on Leaderboard</div>
+            <div class="setting-desc">Let neighbours see your rank</div>
+          </div>
+          <div class="setting-right">
+            <label class="toggle"><input type="checkbox" id="tog-lb" checked><div class="toggle-slider"></div></label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-icon">📊</div>
+          <div class="setting-info">
+            <div class="setting-name">Share Impact Stats</div>
+            <div class="setting-desc">Allow DumpIt to use your CO₂ stats anonymously</div>
+          </div>
+          <div class="setting-right">
+            <label class="toggle"><input type="checkbox" id="tog-stats" checked><div class="toggle-slider"></div></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div class="settings-section">
+      <div class="section-label">📱 App</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-icon">🌙</div>
+          <div class="setting-info">
+            <div class="setting-name">Dark Mode</div>
+            <div class="setting-desc">Currently always dark — light mode coming soon!</div>
+          </div>
+          <div class="setting-right">
+            <label class="toggle"><input type="checkbox" id="tog-dark" checked disabled><div class="toggle-slider"></div></label>
+          </div>
+        </div>
+        <div class="setting-row" onclick="window.location.href='giftpoints.html'" style="cursor:none;">
+          <div class="setting-icon">🪙</div>
+          <div class="setting-info">
+            <div class="setting-name">Gift Points & Rewards</div>
+            <div class="setting-desc">View your points, milestones and redemption history</div>
+          </div>
+          <div class="setting-right"><span class="setting-arrow">→</span></div>
+        </div>
+        <div class="setting-row" onclick="window.location.href='booking.html'" style="cursor:none;">
+          <div class="setting-icon">📅</div>
+          <div class="setting-info">
+            <div class="setting-name">Manage Bookings</div>
+            <div class="setting-desc">View and manage your pickup schedule</div>
+          </div>
+          <div class="setting-right"><span class="setting-arrow">→</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="settings-section">
+      <div class="section-label">⚠️ Account</div>
+      <div class="danger-group">
+        <div class="danger-row" onclick="confirmLogout()">
+          <div class="setting-icon">🚪</div>
+          <div class="setting-info">
+            <div class="danger-name">Logout</div>
+            <div class="danger-desc">Sign out of your DumpIt account</div>
+          </div>
+          <div class="setting-right"><span class="setting-arrow" style="color:#e74c3c;">→</span></div>
+        </div>
+        <div class="danger-row" onclick="alert('Account deletion will be available soon. Contact support@dumpit.in')">
+          <div class="setting-icon">🗑️</div>
+          <div class="setting-info">
+            <div class="danger-name">Delete Account</div>
+            <div class="danger-desc">Permanently delete your account and all data</div>
+          </div>
+          <div class="setting-right"><span class="setting-arrow" style="color:#e74c3c;">→</span></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="save-btn" onclick="saveSettings()">💾 Save All Settings</button>
+
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+  (function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+  document.querySelectorAll('button,a,label,.setting-row,.danger-row').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(1.6)';ring.style.opacity='0.2';});
+    el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='0.4';});
+  });
+
+  // Load user info
+  function loadUser() {
+    const userRaw = localStorage.getItem('dumpit_user');
+    const token = localStorage.getItem('dumpit_token');
+    if (!userRaw || !token) { window.location.href='auth.html'; return; }
+    const user = JSON.parse(userRaw);
+
+    document.getElementById('settingsName').textContent = user.name || 'User';
+    document.getElementById('settingsEmail').textContent = user.email || '—';
+
+    // Avatar initials
+    const parts = (user.name || 'U').trim().split(' ');
+    document.getElementById('settingsAvatar').textContent =
+      parts.length >= 2 ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+      : parts[0].substring(0,2).toUpperCase();
+
+    // Pre-fill modal
+    document.getElementById('editName').value = user.name || '';
+    document.getElementById('editPhone').value = user.phone || '';
+
+    // Load saved settings
+    const saved = JSON.parse(localStorage.getItem('dumpit_settings') || '{}');
+    if (saved.time) document.getElementById('sel-time').value = saved.time;
+    if (saved.address) document.getElementById('inp-address').value = saved.address;
+    if (saved.area) document.getElementById('editArea').value = saved.area;
+    const toggles = ['pickup','points','streak','promo','dry','lb','stats'];
+    toggles.forEach(id => {
+      if (saved[id] !== undefined) document.getElementById('tog-'+id).checked = saved[id];
+    });
+  }
+
+  function openModal() {
+    document.getElementById('editModal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('open');
+  }
+
+  function saveProfile() {
+    const name = document.getElementById('editName').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    const area = document.getElementById('editArea').value.trim();
+    if (!name) { alert('Name cannot be empty!'); return; }
+
+    // Update localStorage
+    const userRaw = localStorage.getItem('dumpit_user');
+    if (userRaw) {
+      const user = JSON.parse(userRaw);
+      user.name = name;
+      user.phone = phone;
+      localStorage.setItem('dumpit_user', JSON.stringify(user));
+    }
+
+    // Update displayed name
+    document.getElementById('settingsName').textContent = name;
+    const parts = name.trim().split(' ');
+    document.getElementById('settingsAvatar').textContent =
+      parts.length >= 2 ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+      : parts[0].substring(0,2).toUpperCase();
+
+    // Save area in settings
+    const saved = JSON.parse(localStorage.getItem('dumpit_settings') || '{}');
+    saved.area = area;
+    localStorage.setItem('dumpit_settings', JSON.stringify(saved));
+
+    closeModal();
+    showToast('✓ Profile updated!');
+  }
+
+  function saveSettings() {
+    const settings = {
+      time: document.getElementById('sel-time').value,
+      address: document.getElementById('inp-address').value,
+      pickup: document.getElementById('tog-pickup').checked,
+      points: document.getElementById('tog-points').checked,
+      streak: document.getElementById('tog-streak').checked,
+      promo: document.getElementById('tog-promo').checked,
+      dry: document.getElementById('tog-dry').checked,
+      lb: document.getElementById('tog-lb').checked,
+      stats: document.getElementById('tog-stats').checked,
+    };
+    localStorage.setItem('dumpit_settings', JSON.stringify(settings));
+    showToast('✓ Settings saved!');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function confirmLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('dumpit_token');
+      localStorage.removeItem('dumpit_user');
+      window.location.href = 'auth.html';
+    }
+  }
+
+  // Close modal on overlay click
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  loadUser();
+</script>
+</body>
+</html>
