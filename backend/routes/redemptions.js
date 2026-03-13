@@ -81,7 +81,7 @@ router.post('/redeem', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const [redemptions] = await db.query(
-      'SELECT * FROM redemptions WHERE user_id = ? ORDER BY created_at DESC',
+      'SELECT * FROM redemptions WHERE user_id = ? ORDER BY redeemed_at DESC',
       [req.user.id]
     );
     res.json(redemptions);
